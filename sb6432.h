@@ -36,9 +36,9 @@ public:
     SB6432(uint8_t clockPin, uint8_t dataPin);
     void begin();
     void setBacklightColor(uint8_t red, uint8_t green, uint8_t blue);
-    void showBuffer();
 protected:
     virtual void doDrawPixel(uint8_t x, uint8_t y, uint8_t mode);
+    virtual void doUpdate();
 private:
     void sendByte(uint8_t data);
     uint8_t* _buffer;

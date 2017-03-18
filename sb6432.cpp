@@ -74,8 +74,7 @@ void SB6432::setBacklightColor(uint8_t red, uint8_t green, uint8_t blue) {
     sendByte(CMD_END_TRANSMISSION);
 }
 
-
-void SB6432::showBuffer() {
+void SB6432::doUpdate() {
     sendByte(0x47);
     sendByte(0x7F);
     sendByte(0xFF);

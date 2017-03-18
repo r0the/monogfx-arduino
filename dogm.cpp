@@ -59,14 +59,22 @@ uint8_t inline powerControlCmd(bool booster, bool regulator, bool follower) {
 DOGM::DOGM(uint8_t csPin, uint8_t resetPin, uint8_t a0Pin, uint8_t clockPin, uint8_t dataPin,
            uint8_t columns, uint8_t pages) :
     MonoGfx(columns, 8 * pages),
-    _buffer(new uint8_t[columns * pages]),
     _a0Pin(a0Pin),
+    _buffer(new uint8_t[columns * pages]),
+    _bufferSize(columns * pages),
     _clockPin(clockPin),
     _columns(columns),
     _csPin(csPin),
     _dataPin(dataPin),
     _pages(pages),
     _resetPin(resetPin) {
+    for (uint16_t i = 0; i < _bufferSize; ++i) {
+        _buffer[i] = 0;
+    }
+}
+
+DOGM128::DOGM128(uint8_t csPin, uint8_t resetPin, uint8_t a0Pin, uint8_t clockPin, uint8_t dataPin) :
+    DOGM(csPin, resetPin, a0Pin, clockPin, dataPin, 128, 8) {
 }
 
 DOGM132::DOGM132(uint8_t csPin, uint8_t resetPin, uint8_t a0Pin, uint8_t clockPin, uint8_t dataPin) :
@@ -115,23 +123,6 @@ void DOGM::setPowerControl(bool booster, bool regulator, bool follower) {
     endTransfer();
 }
 
-void DOGM::showBuffer() {
-    // clock polarity is 1 (SPI mode 3)
-    beginTransferCmd();
-    digitalWrite(_clockPin, HIGH);
-    digitalWrite(_csPin, LOW);
-
-    for (uint8_t page = 0; page < _pages; ++page) {
-        sendByte(CMD_SET_PAGE | page); // select page
-        digitalWrite(_a0Pin, HIGH); // set A0 to 1 to transfer data
-        for (uint8_t column = 0; column < _columns; ++column) {
-            sendByte(_buffer[_columns * page + column]);
-        }
-
-        digitalWrite(_a0Pin, LOW);
-    }
-}
-
 void DOGM::switchOn() {
     beginTransferCmd();
     sendByte(CMD_SWITCH_ON);
@@ -146,7 +137,7 @@ void DOGM::switchOff() {
 
 void DOGM::doDrawPixel(uint8_t x, uint8_t y, uint8_t mode) {
     uint8_t bit = y % 8;
-    uint8_t pos = _columns * y / 8 + x;
+    uint16_t pos = _columns * (y / 8) + x;
     switch (mode) {
         case MODE_SET:
             _buffer[pos] = _buffer[pos] | _BV(bit);
@@ -158,6 +149,26 @@ void DOGM::doDrawPixel(uint8_t x, uint8_t y, uint8_t mode) {
             _buffer[pos] = _buffer[pos] ^ _BV(bit);
             break;
     }
+}
+
+void DOGM::doUpdate() {
+    beginTransferCmd();
+    uint8_t page = 0;
+    digitalWrite(_a0Pin, HIGH); // set A0 to 1 to transfer data
+    for (uint16_t i = 0; i < _bufferSize; ++i) {
+        if (i % _columns == 0) {
+            digitalWrite(_a0Pin, LOW);
+            sendByte(CMD_SET_PAGE | page); // select page
+            sendByte(B00010000); // set column address to zero
+            sendByte(B00000000); // set column address to zero
+            digitalWrite(_a0Pin, HIGH);
+            ++page;
+        }
+
+        sendByte(_buffer[i]);
+    }
+
+    endTransfer();
 }
 
 void DOGM::beginTransferCmd() {

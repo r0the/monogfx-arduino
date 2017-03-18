@@ -37,23 +37,29 @@ public:
          uint8_t columns, uint8_t pages);
     void begin();
     void setPowerControl(bool booster, bool regulator, bool follower);
-    virtual void showBuffer();
     void switchOn();
     void switchOff();
 protected:
     virtual void doDrawPixel(uint8_t x, uint8_t y, uint8_t mode);
+    virtual void doUpdate();
 private:
     void beginTransferCmd();
     void endTransfer();
     void sendByte(uint8_t data);
     uint8_t _a0Pin;
     uint8_t* _buffer;
+    uint16_t _bufferSize;
     uint8_t _clockPin;
     uint8_t _columns;
     uint8_t _csPin;
     uint8_t _dataPin;
     uint8_t _pages;
     uint8_t _resetPin;
+};
+
+class DOGM128 : public DOGM {
+public:
+    DOGM128(uint8_t csPin, uint8_t resetPin, uint8_t a0Pin, uint8_t clockPin, uint8_t dataPin);
 };
 
 class DOGM132 : public DOGM {

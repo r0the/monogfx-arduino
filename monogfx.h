@@ -58,12 +58,14 @@ public:
     void fill(uint8_t mode = MODE_SET);
     void fillRect(uint8_t x, uint8_t y, uint8_t w, uint8_t h, uint8_t mode = MODE_SET);
     inline uint8_t height() const { return _height; }
+    void update();
     inline uint8_t width() const { return _width; }
     uint8_t write(uint8_t x, uint8_t y, const char* text, uint8_t mode = MODE_SET);
 protected:
     virtual void doDrawPixel(uint8_t x, uint8_t y, uint8_t mode = MODE_SET) = 0;
     virtual void doDrawHLine(uint8_t x, uint8_t y, uint8_t length, uint8_t mode);
     virtual void doDrawVLine(uint8_t x, uint8_t y, uint8_t length, uint8_t mode);
+    virtual void doUpdate() = 0;
 
 private:
     uint8_t MonoGfx::writeChar(uint8_t x, uint8_t y, char ch, uint8_t mode);

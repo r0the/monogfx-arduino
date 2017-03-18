@@ -133,6 +133,10 @@ void MonoGfx::fillRect(uint8_t x, uint8_t y, uint8_t w, uint8_t h, uint8_t mode)
     }
 }
 
+void MonoGfx::update() {
+    doUpdate();
+}
+
 uint8_t MonoGfx::write(uint8_t x, uint8_t y, const char* text, uint8_t mode) {
     int i = 0;
     while (text[i] != '\0') {
