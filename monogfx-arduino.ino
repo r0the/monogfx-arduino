@@ -2,7 +2,7 @@
 #include "sb6432.h"
 #include "dogm.h"
 
-DOGM lcd(10, 11, 12, 8, 9);
+DOGM132 lcd(10, 11, 12, 8, 9);
 
 void setup() {
     lcd.begin();
