@@ -27,6 +27,7 @@
  */
 
 #include "dogm.h"
+#include <SPI.h>
 
 #define CMD_SET_PAGE_ADDRESS           B01000000 // 0x40
 #define CMD_SET_ADC                    B10100000 // 0xA0
@@ -66,6 +67,7 @@ DOGM::DOGM(uint8_t csPin, uint8_t resetPin, uint8_t a0Pin, uint8_t clockPin, uin
     _columns(columns),
     _csPin(csPin),
     _dataPin(dataPin),
+    _hwSpi(clockPin == dataPin),
     _pages(pages),
     _resetPin(resetPin) {
     for (uint16_t i = 0; i < _bufferSize; ++i) {
@@ -73,8 +75,16 @@ DOGM::DOGM(uint8_t csPin, uint8_t resetPin, uint8_t a0Pin, uint8_t clockPin, uin
     }
 }
 
+DOGM128::DOGM128(uint8_t csPin, uint8_t resetPin, uint8_t a0Pin) :
+    DOGM(csPin, resetPin, a0Pin, 0, 0, 128, 8) {
+}
+
 DOGM128::DOGM128(uint8_t csPin, uint8_t resetPin, uint8_t a0Pin, uint8_t clockPin, uint8_t dataPin) :
     DOGM(csPin, resetPin, a0Pin, clockPin, dataPin, 128, 8) {
+}
+
+DOGM132::DOGM132(uint8_t csPin, uint8_t resetPin, uint8_t a0Pin) :
+    DOGM(csPin, resetPin, a0Pin, 0, 0, 132, 4) {
 }
 
 DOGM132::DOGM132(uint8_t csPin, uint8_t resetPin, uint8_t a0Pin, uint8_t clockPin, uint8_t dataPin) :
@@ -82,10 +92,19 @@ DOGM132::DOGM132(uint8_t csPin, uint8_t resetPin, uint8_t a0Pin, uint8_t clockPi
 }
 
 void DOGM::begin() {
+    if (_hwSpi) {
+        SPI.begin();
+        SPI.setBitOrder(MSBFIRST);
+        SPI.setDataMode(SPI_MODE3);
+        SPI.setClockDivider(SPI_CLOCK_DIV4);
+    }
+    else {
+        pinMode(_clockPin, OUTPUT);
+        pinMode(_dataPin, OUTPUT);
+    }
+
     pinMode(_a0Pin, OUTPUT);
-    pinMode(_clockPin, OUTPUT);
     pinMode(_csPin, OUTPUT);
-    pinMode(_dataPin, OUTPUT);
     pinMode(_resetPin, OUTPUT);
     // reset pin is active low
     digitalWrite(_resetPin, HIGH);
@@ -172,10 +191,13 @@ void DOGM::doUpdate() {
 }
 
 void DOGM::beginTransferCmd() {
-    // clock polarity is 1 (SPI mode 3)
-    digitalWrite(_clockPin, HIGH);
-    digitalWrite(_csPin, LOW);
+    if (!_hwSpi) {
+        // clock polarity is 1 (SPI mode 3)
+        digitalWrite(_clockPin, HIGH);
+    }
+
     digitalWrite(_a0Pin, LOW);
+    digitalWrite(_csPin, LOW);
 }
 
 void DOGM::endTransfer() {
@@ -183,20 +205,25 @@ void DOGM::endTransfer() {
 }
 
 void DOGM::sendByte(uint8_t data) {
-    uint8_t mask = 128;
-    while (mask > 0) {
-        if ((data & mask) == mask) {
-            digitalWrite(_dataPin, HIGH);
+    if (_hwSpi) {
+        SPI.transfer(data);
+    }
+    else {
+        uint8_t mask = 128;
+        while (mask > 0) {
+            if ((data & mask) == mask) {
+                digitalWrite(_dataPin, HIGH);
+            }
+            else {
+                digitalWrite(_dataPin, LOW);
+            }
+    
+            digitalWrite(_clockPin, LOW);
+            delayMicroseconds(2);
+            digitalWrite(_clockPin, HIGH);
+            delayMicroseconds(2);
+            mask >>= 1;
         }
-        else {
-            digitalWrite(_dataPin, LOW);
-        }
-
-        digitalWrite(_clockPin, LOW);
-        delayMicroseconds(2);
-        digitalWrite(_clockPin, HIGH);
-        delayMicroseconds(2);
-        mask >>= 1;
     }
 }
 

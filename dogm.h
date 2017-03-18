@@ -53,17 +53,20 @@ private:
     uint8_t _columns;
     uint8_t _csPin;
     uint8_t _dataPin;
+    bool _hwSpi;
     uint8_t _pages;
     uint8_t _resetPin;
 };
 
 class DOGM128 : public DOGM {
 public:
+    DOGM128(uint8_t csPin, uint8_t resetPin, uint8_t a0Pin);
     DOGM128(uint8_t csPin, uint8_t resetPin, uint8_t a0Pin, uint8_t clockPin, uint8_t dataPin);
 };
 
 class DOGM132 : public DOGM {
 public:
+    DOGM132(uint8_t csPin, uint8_t resetPin, uint8_t a0Pin);
     DOGM132(uint8_t csPin, uint8_t resetPin, uint8_t a0Pin, uint8_t clockPin, uint8_t dataPin);
 };
 
