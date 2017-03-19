@@ -3,17 +3,17 @@
  *
  * Copyright (c) 2017, Stefan Rothe
  * All rights reserved.
- * 
+ *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
- * 
+ *
  * * Redistributions of source code must retain the above copyright notice, this
  *   list of conditions and the following disclaimer.
- * 
+ *
  * * Redistributions in binary form must reproduce the above copyright notice,
  *   this list of conditions and the following disclaimer in the documentation
  *   and/or other materials provided with the distribution.
- * 
+ *
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
  * AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
  * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
@@ -30,11 +30,29 @@
 #define MONOGFX_H
 
 #include <Arduino.h>
-#include "gfxfont.h"
 
 #define MODE_SET 0
 #define MODE_CLEAR 1
 #define MODE_INVERT 2
+
+// Adafruit GFX font structures
+
+struct GFXglyph {
+    uint16_t bitmapOffset;
+    uint8_t width;
+    uint8_t height;
+    uint8_t xAdvance;
+    int8_t xOffset;
+    int8_t yOffset;
+};
+
+struct GFXfont {
+    uint8_t* bitmap;
+    GFXglyph* glyph;
+    uint8_t first;
+    uint8_t last;
+    uint8_t yAdvance;
+};
 
 class Font;
 
@@ -61,7 +79,7 @@ protected:
 
 private:
     uint8_t writeCharGfx(uint8_t x, uint8_t y, char ch, uint8_t mode);
-    uint8_t writeCharBuiltin(uint8_t x, uint8_t y, char ch, uint8_t mode);
+    uint8_t writeCharDefault(uint8_t x, uint8_t y, char ch, uint8_t mode);
 
     Font* _font;
     uint8_t _height;
@@ -69,4 +87,3 @@ private:
 };
 
 #endif // MONOGFX_H
-
