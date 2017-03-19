@@ -30,6 +30,7 @@
 #define MONOGFX_H
 
 #include <Arduino.h>
+#include "gfxfont.h"
 
 #define MODE_SET 0
 #define MODE_CLEAR 1
@@ -37,14 +38,44 @@
 
 class Bitmap {
 public:
-    Bitmap(uint8_t width, uint8_t height, const uint8_t* ptr);
-    inline uint8_t operator[](uint8_t index) const { return pgm_read_byte(_ptr + index); }
+    Bitmap(uint8_t width, uint8_t height, const uint8_t* const pgmPtr);
+    inline uint8_t operator[](uint8_t index) const { return pgm_read_byte(_pgmPtr + index); }
     inline uint8_t height() const { return _height; }
     inline uint8_t width() const { return _width; }
 private:
-    uint8_t _height;
-    const uint8_t* _ptr;
-    uint8_t _width;
+    const uint8_t _height;
+    const uint8_t* const _pgmPtr;
+    const uint8_t _width;
+};
+
+class Glyph {
+public:
+    Glyph(const GFXglyph* pgmGlyph, const uint8_t* pgmBitmap);
+    inline uint8_t operator[](uint8_t index) const { return pgm_read_byte(_pgmGlyphBitmap + index); }
+    inline uint8_t Glyph::width() const { return pgm_read_byte(&_pgmGlyph->width); }
+    inline uint8_t Glyph::height() const { return pgm_read_byte(&_pgmGlyph->height); }
+    inline uint8_t Glyph::xAdvance() const { return pgm_read_byte(&_pgmGlyph->xAdvance); }
+    inline int8_t Glyph::xOffset() const { return pgm_read_byte(&_pgmGlyph->xOffset); }
+    inline int8_t Glyph::yOffset() const { return pgm_read_byte(&_pgmGlyph->yOffset); }
+private:
+    const uint8_t* _pgmGlyphBitmap;
+    const GFXglyph* _pgmGlyph;
+};
+
+class Font {
+public:
+    explicit Font(const GFXfont& pgmFont);
+    void assign(const GFXfont& pgmFont);
+    Glyph glyph(char ch) const;
+    inline char first() const { return _first; }
+    inline char last() const { return _last; }
+    inline uint8_t yAdvance() const { return _yAdvance; }
+private:
+    char _first;
+    char _last;
+    const uint8_t* _pgmBitmap;
+    const GFXglyph* _pgmGlyphs;
+    uint8_t _yAdvance;
 };
 
 class MonoGfx {
@@ -58,6 +89,7 @@ public:
     void fill(uint8_t mode = MODE_SET);
     void fillRect(uint8_t x, uint8_t y, uint8_t w, uint8_t h, uint8_t mode = MODE_SET);
     inline uint8_t height() const { return _height; }
+    void setFont(const GFXfont& pgmFont);
     void update();
     inline uint8_t width() const { return _width; }
     uint8_t write(uint8_t x, uint8_t y, const char* text, uint8_t mode = MODE_SET);
@@ -68,8 +100,10 @@ protected:
     virtual void doUpdate() = 0;
 
 private:
-    uint8_t MonoGfx::writeChar(uint8_t x, uint8_t y, char ch, uint8_t mode);
+    uint8_t writeCharGfx(uint8_t x, uint8_t y, char ch, uint8_t mode);
+    uint8_t writeCharBuiltin(uint8_t x, uint8_t y, char ch, uint8_t mode);
 
+    Font _font;
     uint8_t _height;
     uint8_t _width;
 };

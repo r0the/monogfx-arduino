@@ -2,18 +2,21 @@
 #include "sb6432.h"
 #include "dogm.h"
 
-DOGM132 lcd(10, 11, 12, 8, 9);
+//DOGM132 lcd(10, 11, 12, 8, 9);
+//SB6432 lcd(3, 4);
+DOGM132 lcd(10, 11, 12);
 
 void setup() {
     lcd.begin();
 //    lcd.setBacklightColor(128, 128, 128);
+//    lcd.setFont(FreeMono12pt7b);
 }
 
 void loop() {
     lcd.fill(MODE_CLEAR);
-    lcd.write(0, 0, "Hello World");
+    lcd.write(0, 20, "Hello World");
     lcd.update();
-    delay(2000);
+    delay(10000);
 
     lcd.fill(MODE_CLEAR);
     for (uint8_t r = 0; r < lcd.height(); r += 4) {
@@ -23,7 +26,7 @@ void loop() {
     }
 
     delay(2000);
-    
+
     lcd.fill(MODE_CLEAR);
     for (uint8_t x = 0; x < lcd.width(); x += 4) {
         lcd.drawLine(lcd.width() / 2, lcd.height() / 2, x, 0);

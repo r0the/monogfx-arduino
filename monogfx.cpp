@@ -28,14 +28,43 @@
 
 #include "monogfx.h"
 #include "font.h"
+#include "FreeSans9pt7b.h"
 
-Bitmap::Bitmap(uint8_t width, uint8_t height, const uint8_t* ptr) :
+#if !defined(__INT_MAX__) || (__INT_MAX__ > 0xFFFF)
+    #define pgm_read_ptr(addr) pgm_read_ptr_far(addr)
+#else
+    #define pgm_read_ptr(addr) pgm_read_ptr_near(addr)
+#endif
+
+Bitmap::Bitmap(uint8_t width, uint8_t height, const uint8_t* pgmPtr) :
     _height(height),
-    _ptr(ptr),
+    _pgmPtr(pgmPtr),
     _width(width) {
 }
 
+Glyph::Glyph(const GFXglyph* pgmGlyph, const uint8_t* pgmBitmap) :
+    _pgmGlyphBitmap(pgmBitmap + pgm_read_word(&pgmGlyph->bitmapOffset)),
+    _pgmGlyph(pgmGlyph) {
+}
+
+Glyph Font::glyph(char ch) const {
+    return Glyph(_pgmGlyphs + (ch - _first), _pgmBitmap);
+}
+
+Font::Font(const GFXfont& pgmFont) {
+    assign(pgmFont);
+}
+
+void Font::assign(const GFXfont& pgmFont) {
+    _first = pgm_read_byte(&pgmFont.first);
+    _last = pgm_read_byte(&pgmFont.last);
+    _pgmBitmap = pgm_read_ptr(&pgmFont.bitmap);
+    _pgmGlyphs = pgm_read_ptr(&pgmFont.glyph);
+    _yAdvance = pgm_read_byte(&pgmFont.yAdvance);
+}
+
 MonoGfx::MonoGfx(uint8_t width, uint8_t height) :
+    _font(FreeSans9pt7b),
     _height(height),
     _width(width) {
 }
@@ -133,6 +162,11 @@ void MonoGfx::fillRect(uint8_t x, uint8_t y, uint8_t w, uint8_t h, uint8_t mode)
     }
 }
 
+
+void MonoGfx::setFont(const GFXfont& pgmFont) {
+    _font = Font(pgmFont);
+}
+
 void MonoGfx::update() {
     doUpdate();
 }
@@ -140,7 +174,7 @@ void MonoGfx::update() {
 uint8_t MonoGfx::write(uint8_t x, uint8_t y, const char* text, uint8_t mode) {
     int i = 0;
     while (text[i] != '\0') {
-        x = writeChar(x, y, text[i], mode);
+        x = writeCharGfx(x, y - 7, text[i], mode);
         ++i;
     }
 
@@ -163,7 +197,33 @@ void MonoGfx::doDrawVLine(uint8_t x, uint8_t y, uint8_t length, uint8_t mode) {
     }
 }
 
-uint8_t MonoGfx::writeChar(uint8_t x, uint8_t y, char ch, uint8_t mode) {
+uint8_t MonoGfx::writeCharGfx(uint8_t x, uint8_t y, char ch, uint8_t mode) {
+    Glyph glyph = _font.glyph(ch);
+    uint8_t h = glyph.height();
+    uint8_t w = glyph.width();
+    int8_t xOffset = glyph.xOffset();
+    int8_t yOffset = glyph.yOffset();
+    uint8_t data;
+    uint8_t bit = 0;
+    for (uint8_t yi = 0; yi < h; ++yi) {
+        for (uint8_t xi = 0; xi < w; ++xi) {
+            if (bit % 8 == 0) {
+                data = glyph[bit / 8];
+            }
+
+            if (data & 0x80) {
+                drawPixel(x + xOffset + xi, y + yOffset + yi, mode);
+            }
+
+            data <<= 1;
+            ++bit;
+        }
+    }
+
+    return x + glyph.xAdvance();
+}
+
+uint8_t MonoGfx::writeCharBuiltin(uint8_t x, uint8_t y, char ch, uint8_t mode) {
     uint8_t charWidth = readFont(ch, CHAR_BYTES - 1);
     uint8_t data;
     for (int i = 0; i < charWidth; ++i) {

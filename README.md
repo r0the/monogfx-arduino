@@ -1,4 +1,4 @@
-# monogfx-arduino
+# MonoGFX
 
 An Arduino library for monochrome LCD graphic displays. Currently supports the following devices:
 
@@ -10,5 +10,6 @@ Functionality:
 
 * Drawing lines, circles, rectangles
 * Drawing text
+* Support for Adafruit GFX Fonts
 * Drawing images (XBM)
 * Backlight control
