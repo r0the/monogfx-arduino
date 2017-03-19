@@ -28,7 +28,7 @@
 
 #include "monogfx.h"
 #include "font.h"
-#include "FreeSans9pt7b.h"
+#include "FreeSans7pt.h"
 
 #if !defined(__INT_MAX__) || (__INT_MAX__ > 0xFFFF)
     #define pgm_read_ptr(addr) pgm_read_ptr_far(addr)
@@ -36,49 +36,69 @@
     #define pgm_read_ptr(addr) pgm_read_ptr_near(addr)
 #endif
 
-Bitmap::Bitmap(uint8_t width, uint8_t height, const uint8_t* pgmPtr) :
-    _height(height),
-    _pgmPtr(pgmPtr),
-    _width(width) {
-}
+class Glyph {
+public:
+    Glyph(const GFXglyph* pgmGlyph, const uint8_t* pgmBitmap) :
+        _pgmGlyphBitmap(pgmBitmap + pgm_read_word(&pgmGlyph->bitmapOffset)),
+        _pgmGlyph(pgmGlyph) {
+    }
 
-Glyph::Glyph(const GFXglyph* pgmGlyph, const uint8_t* pgmBitmap) :
-    _pgmGlyphBitmap(pgmBitmap + pgm_read_word(&pgmGlyph->bitmapOffset)),
-    _pgmGlyph(pgmGlyph) {
-}
+    inline uint8_t operator[](uint8_t index) const { return pgm_read_byte(_pgmGlyphBitmap + index); }
+    inline uint8_t Glyph::width() const { return pgm_read_byte(&_pgmGlyph->width); }
+    inline uint8_t Glyph::height() const { return pgm_read_byte(&_pgmGlyph->height); }
+    inline uint8_t Glyph::xAdvance() const { return pgm_read_byte(&_pgmGlyph->xAdvance); }
+    inline int8_t Glyph::xOffset() const { return pgm_read_byte(&_pgmGlyph->xOffset); }
+    inline int8_t Glyph::yOffset() const { return pgm_read_byte(&_pgmGlyph->yOffset); }
+private:
+    const uint8_t* _pgmGlyphBitmap;
+    const GFXglyph* _pgmGlyph;
+};
 
-Glyph Font::glyph(char ch) const {
-    return Glyph(_pgmGlyphs + (ch - _first), _pgmBitmap);
-}
+class Font {
+public:
+    explicit Font(const GFXfont& pgmFont) {
+        assign(pgmFont);
+    }
 
-Font::Font(const GFXfont& pgmFont) {
-    assign(pgmFont);
-}
+    void assign(const GFXfont& pgmFont) {
+        _first = pgm_read_byte(&pgmFont.first);
+        _last = pgm_read_byte(&pgmFont.last);
+        _pgmBitmap = pgm_read_ptr(&pgmFont.bitmap);
+        _pgmGlyphs = pgm_read_ptr(&pgmFont.glyph);
+        _yAdvance = pgm_read_byte(&pgmFont.yAdvance);
+    }
 
-void Font::assign(const GFXfont& pgmFont) {
-    _first = pgm_read_byte(&pgmFont.first);
-    _last = pgm_read_byte(&pgmFont.last);
-    _pgmBitmap = pgm_read_ptr(&pgmFont.bitmap);
-    _pgmGlyphs = pgm_read_ptr(&pgmFont.glyph);
-    _yAdvance = pgm_read_byte(&pgmFont.yAdvance);
-}
+    Glyph Font::glyph(char ch) const {
+        return Glyph(_pgmGlyphs + (ch - _first), _pgmBitmap);
+    }
+
+    inline char first() const { return _first; }
+    inline char last() const { return _last; }
+    inline uint8_t yAdvance() const { return _yAdvance; }
+private:
+    char _first;
+    char _last;
+    const uint8_t* _pgmBitmap;
+    const GFXglyph* _pgmGlyphs;
+    uint8_t _yAdvance;
+};
 
 MonoGfx::MonoGfx(uint8_t width, uint8_t height) :
-    _font(FreeSans9pt7b),
+    _font(new Font(FreeSans7pt7b)),
     _height(height),
     _width(width) {
 }
 
-void MonoGfx::drawBitmap(int16_t x, int16_t y, const Bitmap& bitmap, uint8_t mode) {
-    const uint8_t byteWidth = (bitmap.width() + 7) / 8;
+void MonoGfx::drawBitmap(int16_t x, int16_t y, const uint8_t* pgmBitmap, uint8_t w, uint8_t h, uint8_t mode) {
+    const uint8_t byteWidth = (w + 7) / 8;
     uint8_t data;
-    for(uint8_t yi = 0; yi < bitmap.height(); ++yi) {
-        for(uint8_t xi = 0; xi < bitmap.width(); ++xi) {
+    for(uint8_t yi = 0; yi < h; ++yi) {
+        for(uint8_t xi = 0; xi < w; ++xi) {
             if (xi & 7) {
                 data >>= 1;
             }
             else {
-                data = bitmap[yi * byteWidth + xi / 8];
+                data = pgm_read_byte(pgmBitmap + (yi * byteWidth + xi / 8));
             }
 
             if (data & 0x01) {
@@ -164,7 +184,8 @@ void MonoGfx::fillRect(uint8_t x, uint8_t y, uint8_t w, uint8_t h, uint8_t mode)
 
 
 void MonoGfx::setFont(const GFXfont& pgmFont) {
-    _font = Font(pgmFont);
+    delete _font;
+    _font = new Font(pgmFont);
 }
 
 void MonoGfx::update() {
@@ -198,7 +219,7 @@ void MonoGfx::doDrawVLine(uint8_t x, uint8_t y, uint8_t length, uint8_t mode) {
 }
 
 uint8_t MonoGfx::writeCharGfx(uint8_t x, uint8_t y, char ch, uint8_t mode) {
-    Glyph glyph = _font.glyph(ch);
+    Glyph glyph = _font->glyph(ch);
     uint8_t h = glyph.height();
     uint8_t w = glyph.width();
     int8_t xOffset = glyph.xOffset();
