@@ -202,6 +202,7 @@ private:
 
 MonoGfx::MonoGfx(uint8_t width, uint8_t height) :
     _font(NULL),
+    _fontScale(1),
     _height(height),
     _width(width) {
 }
@@ -305,6 +306,12 @@ void MonoGfx::setFont(const GFXfont& pgmFont) {
     _font = new Font(pgmFont);
 }
 
+void MonoGfx::setFontScale(uint8_t fontScale) {
+    if (fontScale > 0) {
+        _fontScale = fontScale;
+    }
+}
+
 void MonoGfx::update() {
     doUpdate();
 }
@@ -370,18 +377,23 @@ uint8_t MonoGfx::writeCharGfx(uint8_t x, uint8_t y, char ch, uint8_t mode) {
 uint8_t MonoGfx::writeCharDefault(uint8_t x, uint8_t y, char ch, uint8_t mode) {
     uint8_t charWidth = readFont(ch, CHAR_BYTES - 1);
     uint8_t data;
-    for (int i = 0; i < charWidth; ++i) {
+    for (uint8_t i = 0; i < charWidth; ++i) {
         data = readFont(ch, i);
         for (uint8_t yi = 0; yi < 8; ++yi) {
             if (data & 1) {
-                drawPixel(x, y - 7 + yi, mode);
+                for (uint8_t sx = 0; sx < _fontScale; ++sx) {
+                    for (uint8_t sy = 0; sy < _fontScale; ++sy) {
+                        drawPixel(x + sx, y + (yi - 7) * _fontScale + sy, mode);
+                    }
+                }
             }
 
             data >>= 1;
         }
-
-        ++x;
+   
+        x += _fontScale;
     }
 
     return x + 1;
 }
+

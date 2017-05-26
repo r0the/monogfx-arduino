@@ -68,6 +68,7 @@ public:
     void fillRect(uint8_t x, uint8_t y, uint8_t w, uint8_t h, uint8_t mode = MODE_SET);
     inline uint8_t height() const { return _height; }
     void setFont(const GFXfont& pgmFont);
+    void setFontScale(uint8_t fontScale);
     void update();
     inline uint8_t width() const { return _width; }
     uint8_t write(uint8_t x, uint8_t y, const char* text, uint8_t mode = MODE_SET);
@@ -82,8 +83,10 @@ private:
     uint8_t writeCharDefault(uint8_t x, uint8_t y, char ch, uint8_t mode);
 
     Font* _font;
+    uint8_t _fontScale;
     uint8_t _height;
     uint8_t _width;
 };
 
 #endif // MONOGFX_H
+
