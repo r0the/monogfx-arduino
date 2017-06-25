@@ -161,11 +161,11 @@ public:
     }
 
     inline uint8_t operator[](uint8_t index) const { return pgm_read_byte(_pgmGlyphBitmap + index); }
-    inline uint8_t Glyph::width() const { return pgm_read_byte(&_pgmGlyph->width); }
-    inline uint8_t Glyph::height() const { return pgm_read_byte(&_pgmGlyph->height); }
-    inline uint8_t Glyph::xAdvance() const { return pgm_read_byte(&_pgmGlyph->xAdvance); }
-    inline int8_t Glyph::xOffset() const { return pgm_read_byte(&_pgmGlyph->xOffset); }
-    inline int8_t Glyph::yOffset() const { return pgm_read_byte(&_pgmGlyph->yOffset); }
+    inline uint8_t width() const { return pgm_read_byte(&_pgmGlyph->width); }
+    inline uint8_t height() const { return pgm_read_byte(&_pgmGlyph->height); }
+    inline uint8_t xAdvance() const { return pgm_read_byte(&_pgmGlyph->xAdvance); }
+    inline int8_t xOffset() const { return pgm_read_byte(&_pgmGlyph->xOffset); }
+    inline int8_t yOffset() const { return pgm_read_byte(&_pgmGlyph->yOffset); }
 private:
     const uint8_t* _pgmGlyphBitmap;
     const GFXglyph* _pgmGlyph;
@@ -180,12 +180,12 @@ public:
     void assign(const GFXfont& pgmFont) {
         _first = pgm_read_byte(&pgmFont.first);
         _last = pgm_read_byte(&pgmFont.last);
-        _pgmBitmap = pgm_read_ptr(&pgmFont.bitmap);
-        _pgmGlyphs = pgm_read_ptr(&pgmFont.glyph);
+        _pgmBitmap = reinterpret_cast<const uint8_t*>(pgm_read_ptr(&pgmFont.bitmap));
+        _pgmGlyphs = reinterpret_cast<const GFXglyph*>(pgm_read_ptr(&pgmFont.glyph));
         _yAdvance = pgm_read_byte(&pgmFont.yAdvance);
     }
 
-    Glyph Font::glyph(char ch) const {
+    Glyph glyph(char ch) const {
         return Glyph(_pgmGlyphs + (ch - _first), _pgmBitmap);
     }
 
@@ -226,7 +226,7 @@ void MonoGfx::drawBitmap(int16_t x, int16_t y, const uint8_t* pgmBitmap, uint8_t
     }
 }
 
-void MonoGfx::drawCircle(uint8_t xm, uint8_t ym, uint8_t r, uint8_t mode = MODE_SET) {
+void MonoGfx::drawCircle(uint8_t xm, uint8_t ym, uint8_t r, uint8_t mode) {
     int16_t x = -r;
     int16_t y = 0;
     int16_t err = 2 - 2 * r;
@@ -281,7 +281,7 @@ void MonoGfx::fill(uint8_t mode) {
     }
 }
 
-void MonoGfx::drawPixel(uint8_t x, uint8_t y, uint8_t mode = MODE_SET) {
+void MonoGfx::drawPixel(uint8_t x, uint8_t y, uint8_t mode) {
     if (0 <= x && x < _width && 0 <= y && y < _height) {
         doDrawPixel(x, y, mode);
     }
