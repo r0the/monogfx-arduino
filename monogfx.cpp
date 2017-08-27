@@ -312,12 +312,28 @@ void MonoGfx::setFontScale(uint8_t fontScale) {
     }
 }
 
+
+void MonoGfx::setTextAlign(uint8_t textAlign) {
+    if (textAlign <= ALIGN_CENTER) {
+        _textAlign = textAlign;
+    }
+}
+
 void MonoGfx::update() {
     doUpdate();
 }
 
 uint8_t MonoGfx::write(uint8_t x, uint8_t y, const char* text, uint8_t mode) {
-    int i = 0;
+    uint8_t i = 0;
+    switch (_textAlign) {
+        case ALIGN_RIGHT:
+            x = x - textWidth(text);
+            break;
+        case ALIGN_CENTER:
+            x = x - textWidth(text) / 2;
+            break;
+    }
+
     while (text[i] != '\0') {
         if (_font) {
             x = writeCharGfx(x, y, text[i], mode);
@@ -346,6 +362,24 @@ void MonoGfx::doDrawVLine(uint8_t x, uint8_t y, uint8_t length, uint8_t mode) {
         ++y;
         --length;
     }
+}
+
+uint8_t MonoGfx::textWidth(const char* text) const {
+    uint8_t result = 0;
+    uint8_t i = 0;
+    while (text[i] != '\0') {
+        if (_font) {
+            Glyph glyph = _font->glyph(text[i]);
+            result += glyph.width() + glyph.xAdvance();
+        }
+        else {
+            result += (readFont(text[i], CHAR_BYTES - 1) + 1) * _fontScale;
+        }
+
+        ++i;
+    }
+
+    return result - 1;
 }
 
 uint8_t MonoGfx::writeCharGfx(uint8_t x, uint8_t y, char ch, uint8_t mode) {

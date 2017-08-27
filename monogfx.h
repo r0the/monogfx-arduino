@@ -35,6 +35,10 @@
 #define MODE_CLEAR 1
 #define MODE_INVERT 2
 
+#define ALIGN_LEFT 0
+#define ALIGN_RIGHT 1
+#define ALIGN_CENTER 2
+
 // Adafruit GFX font structures
 
 struct GFXglyph {
@@ -69,6 +73,8 @@ public:
     inline uint8_t height() const { return _height; }
     void setFont(const GFXfont& pgmFont);
     void setFontScale(uint8_t fontScale);
+    void setTextAlign(uint8_t textAlign);
+    inline uint8_t textAlign() const { return _textAlign; }
     void update();
     inline uint8_t width() const { return _width; }
     uint8_t write(uint8_t x, uint8_t y, const char* text, uint8_t mode = MODE_SET);
@@ -79,9 +85,11 @@ protected:
     virtual void doUpdate() = 0;
 
 private:
+    uint8_t textWidth(const char* text) const;
     uint8_t writeCharGfx(uint8_t x, uint8_t y, char ch, uint8_t mode);
     uint8_t writeCharDefault(uint8_t x, uint8_t y, char ch, uint8_t mode);
 
+    uint8_t _textAlign;
     Font* _font;
     uint8_t _fontScale;
     uint8_t _height;
