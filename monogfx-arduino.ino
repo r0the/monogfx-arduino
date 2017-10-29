@@ -1,14 +1,17 @@
-#include <SPI.h>
+#include "ssd1331.h"
 #include "sb6432.h"
 #include "dogm.h"
 
 //DOGM132 lcd(10, 11, 12, 8, 9);
-SB6432 lcd(3, 4);
+SSD1331 lcd(13, 12);
 //DOGM132 lcd(10, 11, 12);
 
 void setup() {
     lcd.begin();
-    lcd.setBacklightColor(128, 128, 128);
+    lcd.setBackgroundColor(64, 0, 0);
+   
+
+    //lcd.setBacklightColor(128, 128, 128);
 //    lcd.setFont(FreeMono12pt7b);
 }
 
@@ -16,7 +19,7 @@ void loop() {
     lcd.fill(MODE_CLEAR);
     lcd.write(0, 20, "Hello World");
     lcd.update();
-    delay(10000);
+    delay(2000);
 
     lcd.fill(MODE_CLEAR);
     for (uint8_t r = 0; r < lcd.height(); r += 4) {
