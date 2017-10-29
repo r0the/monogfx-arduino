@@ -71,18 +71,31 @@ static uint16_t color(uint8_t red, uint8_t green, uint8_t blue) {
 }
 
 SSD1331::SSD1331(uint8_t csPin, uint8_t dcPin) :
+    SSD1331(csPin, dcPin, 0, 0) {
+}
+
+SSD1331::SSD1331(uint8_t csPin, uint8_t dcPin, uint8_t clockPin, uint8_t dataPin) :
     MonoGfx(DISPLAY_WIDTH, DISPLAY_HEIGHT),
     _buffer(new uint8_t[DISPLAY_WIDTH * DISPLAY_HEIGHT / 8]),
+    _clockPin(clockPin),
     _csPin(csPin),
-    _dcPin(dcPin) {
+    _dataPin(dataPin),
+    _dcPin(dcPin),
+    _hwSpi(clockPin == dataPin) {
     setForegroundColor(255, 255, 255);
     setBackgroundColor(0, 0, 0);
 }
 
 void SSD1331::begin() {
-    SPI.begin();
-    SPI.setBitOrder(MSBFIRST);
-    SPI.setDataMode(SPI_MODE3);
+    if (_hwSpi) {
+        SPI.begin();
+        SPI.setBitOrder(MSBFIRST);
+        SPI.setDataMode(SPI_MODE3);
+    }
+    else {
+        pinMode(_clockPin, OUTPUT);
+        pinMode(_dataPin, OUTPUT);
+    }
 
     pinMode(_dcPin, OUTPUT);
     pinMode(_csPin, OUTPUT);
@@ -113,14 +126,6 @@ void SSD1331::begin() {
     sendCommand(SSD1331_CMD_DISPLAYON);
 }
 
-void SSD1331::setBackgroundColor(uint8_t red, uint8_t green, uint8_t blue) {
-    _backgroundColor = color(red, green, blue);
-}
-
-void SSD1331::setForegroundColor(uint8_t red, uint8_t green, uint8_t blue) {
-    _foregroundColor = color(red, green, blue);
-}
-
 void SSD1331::doDrawPixel(uint8_t x, uint8_t y, uint8_t mode) {
     uint8_t bit = _BV(y % 8);
     uint16_t pos = DISPLAY_WIDTH * (y / 8) + x;
@@ -137,10 +142,17 @@ void SSD1331::doDrawPixel(uint8_t x, uint8_t y, uint8_t mode) {
     }
 }
 
-void SSD1331::doUpdate() {
+void SSD1331::doSetBackgroundColor(uint8_t red, uint8_t green, uint8_t blue) {
+    _backgroundColor = color(red, green, blue);
+}
 
+void SSD1331::doSetForegroundColor(uint8_t red, uint8_t green, uint8_t blue) {
+    _foregroundColor = color(red, green, blue);
+}
+
+void SSD1331::doUpdate() {
     digitalWrite(_dcPin, HIGH);
-    digitalWrite(_csPin, LOW);
+    startTransfer();
     for (uint8_t y = 0; y < DISPLAY_HEIGHT; ++y) {
         for (uint8_t x = 0; x < DISPLAY_WIDTH; ++x) {
             uint8_t bit = _BV(y % 8);
@@ -160,19 +172,38 @@ void SSD1331::doUpdate() {
 }
 
 void SSD1331::sendByte(uint8_t data) const {
-    SPI.transfer(data);
+    if (_hwSpi) {
+        SPI.transfer(data);
+    }
+    else {
+        uint8_t mask = 128;
+        while (mask > 0) {
+            if ((data & mask) == mask) {
+                digitalWrite(_dataPin, HIGH);
+            }
+            else {
+                digitalWrite(_dataPin, LOW);
+            }
+    
+            digitalWrite(_clockPin, LOW);
+            delayMicroseconds(2);
+            digitalWrite(_clockPin, HIGH);
+            delayMicroseconds(2);
+            mask >>= 1;
+        }
+    }
 }
 
 void SSD1331::sendCommand(uint8_t command) {
     digitalWrite(_dcPin, LOW);
-    digitalWrite(_csPin, LOW);
+    startTransfer();
     sendByte(command);
     digitalWrite(_csPin, HIGH);
 }
 
 void SSD1331::sendCommand(uint8_t command, uint8_t param1) {
     digitalWrite(_dcPin, LOW);
-    digitalWrite(_csPin, LOW);
+    startTransfer();
     sendByte(command);
     sendByte(param1);
     digitalWrite(_csPin, HIGH);
@@ -180,10 +211,20 @@ void SSD1331::sendCommand(uint8_t command, uint8_t param1) {
 
 void SSD1331::sendCommand(uint8_t command, uint8_t param1, uint8_t param2) {
     digitalWrite(_dcPin, LOW);
-    digitalWrite(_csPin, LOW);
+    startTransfer();
     sendByte(command);
     sendByte(param1);
     sendByte(param2);
     digitalWrite(_csPin, HIGH);
 }
+
+void SSD1331::startTransfer() {
+    if (!_hwSpi) {
+        // clock polarity is 1 (SPI mode 3)
+        digitalWrite(_clockPin, HIGH);
+    }
+
+    digitalWrite(_csPin, LOW);
+}
+
 

@@ -71,8 +71,10 @@ public:
     void fill(uint8_t mode = MODE_SET);
     void fillRect(uint8_t x, uint8_t y, uint8_t w, uint8_t h, uint8_t mode = MODE_SET);
     inline uint8_t height() const { return _height; }
+    void setBackgroundColor(uint8_t red, uint8_t green, uint8_t blue);
     void setFont(const GFXfont& pgmFont);
     void setFontScale(uint8_t fontScale);
+    void setForegroundColor(uint8_t red, uint8_t green, uint8_t blue);
     void setTextAlign(uint8_t textAlign);
     inline uint8_t textAlign() const { return _textAlign; }
     void update();
@@ -82,6 +84,8 @@ protected:
     virtual void doDrawPixel(uint8_t x, uint8_t y, uint8_t mode = MODE_SET) = 0;
     virtual void doDrawHLine(uint8_t x, uint8_t y, uint8_t length, uint8_t mode);
     virtual void doDrawVLine(uint8_t x, uint8_t y, uint8_t length, uint8_t mode);
+    virtual void doSetBackgroundColor(uint8_t red, uint8_t green, uint8_t blue);
+    virtual void doSetForegroundColor(uint8_t red, uint8_t green, uint8_t blue);
     virtual void doUpdate() = 0;
 
 private:

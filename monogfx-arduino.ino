@@ -3,16 +3,13 @@
 #include "dogm.h"
 
 //DOGM132 lcd(10, 11, 12, 8, 9);
-SSD1331 lcd(13, 12);
+SSD1331 lcd(13, 12, );
 //DOGM132 lcd(10, 11, 12);
 
 void setup() {
     lcd.begin();
     lcd.setBackgroundColor(64, 0, 0);
-   
-
-    //lcd.setBacklightColor(128, 128, 128);
-//    lcd.setFont(FreeMono12pt7b);
+   //    lcd.setFont(FreeMono12pt7b);
 }
 
 void loop() {

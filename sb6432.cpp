@@ -66,7 +66,7 @@ void SB6432::doDrawPixel(uint8_t x, uint8_t y, uint8_t mode) {
     }
 }
 
-void SB6432::setBacklightColor(uint8_t red, uint8_t green, uint8_t blue) {
+void SB6432::doSetBackgroundColor(uint8_t red, uint8_t green, uint8_t blue) {
     sendByte(CMD_SET_RGB_COLOR);
     sendByte(red >> 1);
     sendByte(green >> 1);

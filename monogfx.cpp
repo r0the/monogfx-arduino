@@ -300,6 +300,9 @@ void MonoGfx::fillRect(uint8_t x, uint8_t y, uint8_t w, uint8_t h, uint8_t mode)
     }
 }
 
+void MonoGfx::setBackgroundColor(uint8_t red, uint8_t green, uint8_t blue) {
+    doSetBackgroundColor(red, green, blue);
+}
 
 void MonoGfx::setFont(const GFXfont& pgmFont) {
     delete _font;
@@ -312,6 +315,9 @@ void MonoGfx::setFontScale(uint8_t fontScale) {
     }
 }
 
+void MonoGfx::setForegroundColor(uint8_t red, uint8_t green, uint8_t blue) {
+    doSetForegroundColor(red, green, blue);
+}
 
 void MonoGfx::setTextAlign(uint8_t textAlign) {
     if (textAlign <= ALIGN_CENTER) {
@@ -362,6 +368,12 @@ void MonoGfx::doDrawVLine(uint8_t x, uint8_t y, uint8_t length, uint8_t mode) {
         ++y;
         --length;
     }
+}
+
+void MonoGfx::doSetBackgroundColor(uint8_t red, uint8_t green, uint8_t blue) {
+}
+
+void MonoGfx::doSetForegroundColor(uint8_t red, uint8_t green, uint8_t blue) {
 }
 
 uint8_t MonoGfx::textWidth(const char* text) const {
