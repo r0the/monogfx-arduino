@@ -30,11 +30,12 @@
 #define SSD1331_H
 
 #include "monogfx.h"
+#include "Arduino.h"
 
 class SSD1331 : public MonoGfx {
 public:
-    SSD1331(uint8_t csPin, uint8_t dcPin);
-    SSD1331(uint8_t csPin, uint8_t dcPin, uint8_t clockPin, uint8_t dataPin);
+    SSD1331(uint8_t csPin, uint8_t resetPin, uint8_t dcPin);
+    SSD1331(uint8_t csPin, uint8_t resetPin, uint8_t dcPin, uint8_t clockPin, uint8_t dataPin);
     void begin();
 protected:
     virtual void doDrawPixel(uint8_t x, uint8_t y, uint8_t mode);
@@ -42,19 +43,25 @@ protected:
     virtual void doSetForegroundColor(uint8_t red, uint8_t green, uint8_t blue);
     virtual void doUpdate();
 private:
+    void endTransfer() const;
     void sendByte(uint8_t data) const;
-    void sendCommand(uint8_t command);
-    void sendCommand(uint8_t command, uint8_t param1);
-    void sendCommand(uint8_t command, uint8_t param1, uint8_t param2);
-    void startTransfer();
+    void sendCommand(uint8_t command) const;
+    void sendCommand(uint8_t command, uint8_t param1) const;
+    void sendCommand(uint8_t command, uint8_t param1, uint8_t param2) const;
+    void startTransfer(bool command) const;
     uint16_t _backgroundColor;
     uint8_t* _buffer;
-    uint8_t _csPin;
     uint8_t _clockPin;
+    uint8_t _clockPinMask;
+    uint8_t* _clockPinReg;
+    uint8_t _csPin;
     uint8_t _dataPin;
+    uint8_t _dataPinMask;
+    uint8_t* _dataPinReg;
     uint8_t _dcPin;
     uint16_t _foregroundColor;
     bool _hwSpi;
+    uint8_t _resetPin;
 };
 
 #endif // SSD1331_H
