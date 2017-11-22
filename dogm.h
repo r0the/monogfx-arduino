@@ -41,7 +41,7 @@ public:
     void switchOff();
 protected:
     virtual void doDrawPixel(uint8_t x, uint8_t y, uint8_t mode);
-    virtual void doUpdate();
+    virtual void doUpdate(uint8_t left, uint8_t top, uint8_t right, uint8_t bottom);
 private:
     void beginTransferCmd();
     void endTransfer();

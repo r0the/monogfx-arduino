@@ -3,15 +3,16 @@
 #include "dogm.h"
 
 //DOGM132 lcd(10, 11, 12, 8, 9);
-SSD1331 lcd(13, 11, 12, 10, 9);
+SSD1331 lcd(6, A4, A5);
 //SSD1331 lcd(13, 11, 12);
 //DOGM132 lcd(10, 11, 12);
 
 void setup() {
-//    Serial.begin(9600);
+    pinMode(7, OUTPUT);
+    digitalWrite(7, HIGH);
     delay(500);
     lcd.begin();
-    lcd.setBackgroundColor(64, 0, 0);
+    lcd.setBackgroundColor(64+32, 0, 0);
    //    lcd.setFont(FreeMono12pt7b);
 }
 

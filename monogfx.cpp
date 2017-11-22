@@ -28,11 +28,11 @@
 
 #include "monogfx.h"
 
-#if !defined(__INT_MAX__) || (__INT_MAX__ > 0xFFFF)
-    #define pgm_read_ptr(addr) pgm_read_ptr_far(addr)
-#else
-    #define pgm_read_ptr(addr) pgm_read_ptr_near(addr)
-#endif
+//#if !defined(__INT_MAX__) || (__INT_MAX__ > 0xFFFF)
+//    #define pgm_read_ptr(addr) pgm_read_ptr_far(addr)
+//#else
+//    #define pgm_read_ptr(addr) pgm_read_ptr_near(addr)
+//#endif
 
 
 PROGMEM const uint8_t DefaultFontBitmaps[] PROGMEM = {
@@ -201,13 +201,14 @@ private:
 };
 
 MonoGfx::MonoGfx(uint8_t width, uint8_t height) :
+    _dirty(false),
     _font(NULL),
     _fontScale(1),
     _height(height),
     _width(width) {
 }
 
-void MonoGfx::drawBitmap(int16_t x, int16_t y, const uint8_t* pgmBitmap, uint8_t w, uint8_t h, uint8_t mode) {
+void MonoGfx::drawBitmap(uint8_t x, uint8_t y, const uint8_t* pgmBitmap, uint8_t w, uint8_t h, uint8_t mode) {
     const uint8_t byteWidth = (w + 7) / 8;
     uint8_t data;
     for(uint8_t yi = 0; yi < h; ++yi) {
@@ -287,17 +288,15 @@ void MonoGfx::drawPixel(uint8_t x, uint8_t y, uint8_t mode) {
     }
 }
 
-void MonoGfx::drawRect(uint8_t x, uint8_t y, uint8_t w, uint8_t h, uint8_t mode) {
-    doDrawHLine(x, y, w, mode);
-    doDrawHLine(x, y + h - 1, w, mode);
-    doDrawVLine(x, y, h, mode);
-    doDrawVLine(x + w - 1, y, h, mode);
+void MonoGfx::drawRect(uint8_t x, uint8_t y, uint8_t width, uint8_t height, uint8_t mode) {
+    doDrawHLine(x, y, width, mode);
+    doDrawHLine(x, y + height - 1, width, mode);
+    doDrawVLine(x, y, height, mode);
+    doDrawVLine(x + width - 1, y, height, mode);
 }
 
-void MonoGfx::fillRect(uint8_t x, uint8_t y, uint8_t w, uint8_t h, uint8_t mode) {
-    for (uint8_t i = x; i < x + w; ++i) {
-        doDrawVLine(i, y, h, mode);
-    }
+void MonoGfx::fillRect(uint8_t x, uint8_t y, uint8_t width, uint8_t height, uint8_t mode) {
+    doFillRect(x, y, width, height, mode);
 }
 
 void MonoGfx::setBackgroundColor(uint8_t red, uint8_t green, uint8_t blue) {
@@ -326,7 +325,10 @@ void MonoGfx::setTextAlign(uint8_t textAlign) {
 }
 
 void MonoGfx::update() {
-    doUpdate();
+    if (_dirty) {
+        doUpdate(_dirtyLeft, _dirtyTop, _dirtyRight, _dirtyBottom);
+        _dirty = false;
+    }
 }
 
 uint8_t MonoGfx::write(uint8_t x, uint8_t y, const char* text, uint8_t mode) {
@@ -354,6 +356,22 @@ uint8_t MonoGfx::write(uint8_t x, uint8_t y, const char* text, uint8_t mode) {
     return x;
 }
 
+void MonoGfx::dirty(uint8_t left, uint8_t top, uint8_t right, uint8_t bottom) {
+    if (_dirty) {
+        _dirtyLeft = min(_dirtyLeft, left);
+        _dirtyTop = min(_dirtyTop, top);
+        _dirtyRight = min(_width - 1, max(_dirtyRight, right));
+        _dirtyBottom = min(_height - 1, max(_dirtyBottom, bottom));
+    }
+    else {
+        _dirty = true;
+        _dirtyLeft = left;
+        _dirtyTop = top;
+        _dirtyRight = right;
+        _dirtyBottom = bottom;
+    }
+}
+
 void MonoGfx::doDrawHLine(uint8_t x, uint8_t y, uint8_t length, uint8_t mode) {
     while (length > 0) {
         doDrawPixel(x, y, mode);
@@ -364,9 +382,15 @@ void MonoGfx::doDrawHLine(uint8_t x, uint8_t y, uint8_t length, uint8_t mode) {
 
 void MonoGfx::doDrawVLine(uint8_t x, uint8_t y, uint8_t length, uint8_t mode) {
     while (length > 0) {
-        drawPixel(x, y, mode);
+        doDrawPixel(x, y, mode);
         ++y;
         --length;
+    }
+}
+
+void MonoGfx::doFillRect(uint8_t x, uint8_t y, uint8_t width, uint8_t height, uint8_t mode) {
+    for (uint8_t i = x; i < x + width; ++i) {
+        doDrawVLine(i, y, height, mode);
     }
 }
 

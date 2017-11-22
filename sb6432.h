@@ -38,7 +38,7 @@ public:
 protected:
     virtual void doDrawPixel(uint8_t x, uint8_t y, uint8_t mode);
     virtual void doSetBackgroundColor(uint8_t red, uint8_t green, uint8_t blue);
-    virtual void doUpdate();
+    virtual void doUpdate(uint8_t left, uint8_t top, uint8_t right, uint8_t bottom);
 private:
     void sendByte(uint8_t data);
     uint8_t* _buffer;

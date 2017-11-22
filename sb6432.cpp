@@ -51,17 +51,17 @@ void SB6432::begin() {
 }
 
 void SB6432::doDrawPixel(uint8_t x, uint8_t y, uint8_t mode) {
-    uint8_t bit = y % 8;
+    uint8_t bit = 0x80 >> (y % 8);
     uint8_t pos = POS_MAP[y / 8] + 4 * x;
     switch (mode) {
         case MODE_SET:
-            _buffer[pos] = _buffer[pos] | _BV(7 - bit);
+            _buffer[pos] = _buffer[pos] | bit;
             break;
         case MODE_CLEAR:
-            _buffer[pos] = _buffer[pos] & ~_BV(7 - bit);
+            _buffer[pos] = _buffer[pos] & ~bit;
             break;
         case MODE_INVERT:
-            _buffer[pos] = _buffer[pos] ^ _BV(7 - bit);
+            _buffer[pos] = _buffer[pos] ^ bit;
             break;
     }
 }
@@ -74,7 +74,7 @@ void SB6432::doSetBackgroundColor(uint8_t red, uint8_t green, uint8_t blue) {
     sendByte(CMD_END_TRANSMISSION);
 }
 
-void SB6432::doUpdate() {
+void SB6432::doUpdate(uint8_t left, uint8_t top, uint8_t right, uint8_t bottom) {
     sendByte(0x47);
     sendByte(0x7F);
     sendByte(0xFF);

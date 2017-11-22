@@ -63,13 +63,13 @@ class Font;
 class MonoGfx {
 public:
     MonoGfx(uint8_t width, uint8_t height);
-    void drawBitmap(int16_t x, int16_t y, const uint8_t* pgmBitmap, uint8_t w, uint8_t h, uint8_t mode = MODE_SET);
+    void drawBitmap(uint8_t x, uint8_t y, const uint8_t* pgmBitmap, uint8_t w, uint8_t h, uint8_t mode = MODE_SET);
     void drawCircle(uint8_t x, uint8_t y, uint8_t r, uint8_t mode = MODE_SET);
     void drawLine(uint8_t x1, uint8_t y1, uint8_t x2, uint8_t y2, uint8_t mode = MODE_SET);
     void drawPixel(uint8_t x, uint8_t y, uint8_t mode = MODE_SET);
-    void drawRect(uint8_t x, uint8_t y, uint8_t w, uint8_t h, uint8_t mode = MODE_SET);
+    void drawRect(uint8_t x, uint8_t y, uint8_t width, uint8_t height, uint8_t mode = MODE_SET);
     void fill(uint8_t mode = MODE_SET);
-    void fillRect(uint8_t x, uint8_t y, uint8_t w, uint8_t h, uint8_t mode = MODE_SET);
+    void fillRect(uint8_t x, uint8_t y, uint8_t width, uint8_t height, uint8_t mode = MODE_SET);
     inline uint8_t height() const { return _height; }
     void setBackgroundColor(uint8_t red, uint8_t green, uint8_t blue);
     void setFont(const GFXfont& pgmFont);
@@ -81,22 +81,29 @@ public:
     inline uint8_t width() const { return _width; }
     uint8_t write(uint8_t x, uint8_t y, const char* text, uint8_t mode = MODE_SET);
 protected:
+    void dirty(uint8_t left, uint8_t top, uint8_t right, uint8_t bottom);
     virtual void doDrawPixel(uint8_t x, uint8_t y, uint8_t mode = MODE_SET) = 0;
     virtual void doDrawHLine(uint8_t x, uint8_t y, uint8_t length, uint8_t mode);
     virtual void doDrawVLine(uint8_t x, uint8_t y, uint8_t length, uint8_t mode);
+    virtual void doFillRect(uint8_t x, uint8_t y, uint8_t width, uint8_t height, uint8_t mode = MODE_SET);
     virtual void doSetBackgroundColor(uint8_t red, uint8_t green, uint8_t blue);
     virtual void doSetForegroundColor(uint8_t red, uint8_t green, uint8_t blue);
-    virtual void doUpdate() = 0;
+    virtual void doUpdate(uint8_t left, uint8_t top, uint8_t right, uint8_t bottom) = 0;
 
 private:
     uint8_t textWidth(const char* text) const;
     uint8_t writeCharGfx(uint8_t x, uint8_t y, char ch, uint8_t mode);
     uint8_t writeCharDefault(uint8_t x, uint8_t y, char ch, uint8_t mode);
 
-    uint8_t _textAlign;
+    bool _dirty;
+    uint8_t _dirtyBottom;
+    uint8_t _dirtyLeft;
+    uint8_t _dirtyRight;
+    uint8_t _dirtyTop;
     Font* _font;
     uint8_t _fontScale;
     uint8_t _height;
+    uint8_t _textAlign;
     uint8_t _width;
 };
 

@@ -155,22 +155,22 @@ void DOGM::switchOff() {
 }
 
 void DOGM::doDrawPixel(uint8_t x, uint8_t y, uint8_t mode) {
-    uint8_t bit = y % 8;
+    uint8_t bit = 1 << (y % 8);
     uint16_t pos = _columns * (y / 8) + x;
     switch (mode) {
         case MODE_SET:
-            _buffer[pos] = _buffer[pos] | _BV(bit);
+            _buffer[pos] = _buffer[pos] | bit;
             break;
         case MODE_CLEAR:
-            _buffer[pos] = _buffer[pos] & ~_BV(bit);
+            _buffer[pos] = _buffer[pos] & ~bit;
             break;
         case MODE_INVERT:
-            _buffer[pos] = _buffer[pos] ^ _BV(bit);
+            _buffer[pos] = _buffer[pos] ^ bit;
             break;
     }
 }
 
-void DOGM::doUpdate() {
+void DOGM::doUpdate(uint8_t left, uint8_t top, uint8_t right, uint8_t bottom) {
     beginTransferCmd();
     uint8_t page = 0;
     digitalWrite(_a0Pin, HIGH); // set A0 to 1 to transfer data
