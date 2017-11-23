@@ -34,13 +34,20 @@ MonoGfx::MonoGfx(Display* display) :
     _font(&DEFAULT_FONT),
     _fontScale(1),
     _height(display->height()),
+    _mode(MODE_SET),
     _width(display->width())
 {
-    fill(MODE_CLEAR);
+    clear();
 }
 
 MonoGfx::~MonoGfx() {
     delete[] _buffer;
+}
+
+void MonoGfx::clear() {
+    for (int16_t i = 0; i < _width * _height / 8; ++i) {
+        _buffer[i] = 0x00;
+    }
 }
 
 void MonoGfx::debugBegin() {
@@ -63,7 +70,7 @@ void MonoGfx::debugShow() {
     }
 }
 
-void MonoGfx::drawBitmapPgm(int16_t x, int16_t y, const uint8_t* pgmBitmap, uint16_t width, uint16_t height, uint8_t mode) {
+void MonoGfx::drawBitmapPgm(int16_t x, int16_t y, const uint8_t* pgmBitmap, uint16_t width, uint16_t height) {
     const uint8_t byteWidth = (width + 7) / 8;
     uint8_t data;
     for(uint16_t yi = 0; yi < height; ++yi) {
@@ -76,14 +83,14 @@ void MonoGfx::drawBitmapPgm(int16_t x, int16_t y, const uint8_t* pgmBitmap, uint
             }
 
             if (data & 0x01) {
-                drawPixel(x + xi, y + yi, mode);
+                drawPixel(x + xi, y + yi);
             }
         }
     }
 }
 
 
-int16_t MonoGfx::drawCharacter(int16_t x, int16_t y, char ch, uint8_t mode) {
+int16_t MonoGfx::drawCharacter(int16_t x, int16_t y, char ch) {
     uint8_t charWidth = _font->glyphWidth(ch);
     uint8_t data;
     for (uint8_t i = 0; i < charWidth; ++i) {
@@ -92,7 +99,7 @@ int16_t MonoGfx::drawCharacter(int16_t x, int16_t y, char ch, uint8_t mode) {
             if (data & 1) {
                 for (uint8_t sx = 0; sx < _fontScale; ++sx) {
                     for (uint8_t sy = 0; sy < _fontScale; ++sy) {
-                        drawPixel(x + sx, y + (yi - 7) * _fontScale + sy, mode);
+                        drawPixel(x + sx, y + (yi - 7) * _fontScale + sy);
                     }
                 }
             }
@@ -106,16 +113,16 @@ int16_t MonoGfx::drawCharacter(int16_t x, int16_t y, char ch, uint8_t mode) {
     return x + _fontScale;
 }
 
-void MonoGfx::drawCircle(int16_t centerX, int16_t centerY, uint16_t radius, uint8_t mode) {
+void MonoGfx::drawCircle(int16_t centerX, int16_t centerY, uint16_t radius) {
     int16_t x = -radius;
     int16_t y = 0;
     int16_t err = 2 - 2 * radius;
     int16_t oldErr;
     do {
-        drawPixel(centerX - x, centerY + y, mode);
-        drawPixel(centerX - y, centerY - x, mode);
-        drawPixel(centerX + x, centerY - y, mode);
-        drawPixel(centerX + y, centerY + x, mode);
+        drawPixel(centerX - x, centerY + y);
+        drawPixel(centerX - y, centerY - x);
+        drawPixel(centerX + x, centerY - y);
+        drawPixel(centerX + y, centerY + x);
         oldErr = err;
         if (oldErr <= y) {
             ++y;
@@ -129,18 +136,18 @@ void MonoGfx::drawCircle(int16_t centerX, int16_t centerY, uint16_t radius, uint
     } while (x < 0);
 }
 
-void MonoGfx::drawHorizontalLine(int16_t x1, int16_t y, int16_t x2, uint8_t mode) {
+void MonoGfx::drawHorizontalLine(int16_t x1, int16_t y, int16_t x2) {
     if (x1 > x2) {
         return;
     }
 
     while (x1 <= x2) {
-        drawPixel(x1, y, mode);
+        drawPixel(x1, y);
         ++x1;
     }
 }
 
-void MonoGfx::drawLine(int16_t x1, int16_t y1, int16_t x2, int16_t y2, uint8_t mode) {
+void MonoGfx::drawLine(int16_t x1, int16_t y1, int16_t x2, int16_t y2) {
    int16_t dx = abs(x2 - x1);
    int16_t sx = x1 < x2 ? 1 : -1;
    int16_t dy = -abs(y2 - y1);
@@ -148,7 +155,7 @@ void MonoGfx::drawLine(int16_t x1, int16_t y1, int16_t x2, int16_t y2, uint8_t m
    int16_t err = dx + dy;
    int16_t e2;
    while (true){
-        drawPixel(x1, y1, mode);
+        drawPixel(x1, y1);
         if (x1 == x2 && y1 == y2) {
             break;
         }
@@ -166,14 +173,14 @@ void MonoGfx::drawLine(int16_t x1, int16_t y1, int16_t x2, int16_t y2, uint8_t m
     }
 }
 
-void MonoGfx::drawPixel(int16_t x, int16_t y, uint8_t mode) {
+void MonoGfx::drawPixel(int16_t x, int16_t y) {
     if (x < 0 || _width <= x || y < 0 || _height <= y) {
         return;
     }
 
     uint16_t pos = _width * (y / 8) + x;
     uint8_t bit = 1 << (y % 8);
-    switch (mode) {
+    switch (_mode) {
         case MODE_SET:
             _buffer[pos] = _buffer[pos] | bit;
             break;
@@ -186,20 +193,20 @@ void MonoGfx::drawPixel(int16_t x, int16_t y, uint8_t mode) {
     }
 }
 
-void MonoGfx::drawRectangle(int16_t left, int16_t top, uint16_t width, uint16_t height, uint8_t mode) {
+void MonoGfx::drawRectangle(int16_t left, int16_t top, uint16_t width, uint16_t height) {
     if (width <= 0 || height <= 0) {
         return;
     }
 
     const int16_t right = left + width - 1;
     const int16_t bottom = top + height - 1;
-    drawHorizontalLine(left, top, right, mode);
-    drawHorizontalLine(left, bottom, right, mode);
-    drawVerticalLine(left, top, bottom, mode);
-    drawVerticalLine(right, top, bottom, mode);
+    drawHorizontalLine(left, top, right);
+    drawHorizontalLine(left, bottom, right);
+    drawVerticalLine(left, top, bottom);
+    drawVerticalLine(right, top, bottom);
 }
 
-int16_t MonoGfx::drawText(int16_t x, int16_t y, const char* text, uint8_t mode) {
+int16_t MonoGfx::drawText(int16_t x, int16_t y, const char* text) {
     uint8_t i = 0;
     switch (_textAlign) {
         case ALIGN_RIGHT:
@@ -211,31 +218,31 @@ int16_t MonoGfx::drawText(int16_t x, int16_t y, const char* text, uint8_t mode) 
     }
 
     while (text[i] != '\0') {
-        x = drawCharacter(x, y, text[i], mode);
+        x = drawCharacter(x, y, text[i]);
         ++i;
     }
 
     return x;
 }
 
-void MonoGfx::drawVerticalLine(int16_t x, int16_t y1, int16_t y2, uint8_t mode) {
+void MonoGfx::drawVerticalLine(int16_t x, int16_t y1, int16_t y2) {
     if (y1 > y2) {
         return;
     }
 
     while (y1 <= y2) {
-        drawPixel(x, y1, mode);
+        drawPixel(x, y1);
         ++y1;
     }
 }
 
-void MonoGfx::fill(uint8_t mode) {
-    for (int16_t x = 0; x < _width; ++x) {
-        drawVerticalLine(x, 0, _height, mode);
+void MonoGfx::fill() {
+    for (int16_t i = 0; i < _width * _height / 8; ++i) {
+        _buffer[i] = 0xFF;
     }
 }
 
-void MonoGfx::fillRectangle(int16_t left, int16_t top, uint16_t width, uint16_t height, uint8_t mode) {
+void MonoGfx::fillRectangle(int16_t left, int16_t top, uint16_t width, uint16_t height) {
     if (width <= 0 || height <= 0) {
         return;
     }
@@ -243,7 +250,7 @@ void MonoGfx::fillRectangle(int16_t left, int16_t top, uint16_t width, uint16_t 
     const int16_t right = left + width - 1;
     const int16_t bottom = top + height - 1;
     while (top <= bottom) {
-        drawHorizontalLine(left, right, top, mode);
+        drawHorizontalLine(left, right, top);
     }
 }
 
@@ -257,6 +264,14 @@ void MonoGfx::setFontScale(uint8_t fontScale) {
     }
 
     _fontScale = fontScale;
+}
+
+void MonoGfx::setMode(uint8_t mode) {
+    if (mode > MODE_INVERT) {
+        return;
+    }
+
+    _mode = mode;
 }
 
 void MonoGfx::setTextAlign(uint8_t textAlign) {

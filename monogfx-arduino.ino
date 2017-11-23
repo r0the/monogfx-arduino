@@ -22,16 +22,15 @@ void setup() {
 }
 
 void loop() {
-    gfx.fill(MODE_CLEAR);
+    gfx.clear();
     gfx.setFont(&FONT_VICTORIA_8x8);
     gfx.drawText(0, 20, "ABCDefghi");
     gfx.setFont(&FONT_ARTOS_SANS_8x8);
     gfx.drawText(0, 40, "ABCDEFefghi");
     gfx.update();
     delay(2000);
-    return;
 
-    gfx.fill(MODE_CLEAR);
+    gfx.clear();
     for (uint8_t r = 0; r < gfx.height(); r += 4) {
         gfx.drawCircle(gfx.width() / 2, gfx.height() / 2, r);
         gfx.update();
@@ -40,7 +39,7 @@ void loop() {
 
     delay(2000);
 
-    gfx.fill(MODE_CLEAR);
+    gfx.clear();
     for (uint8_t x = 0; x < gfx.width(); x += 4) {
         gfx.drawLine(gfx.width() / 2, gfx.height() / 2, x, 0);
         gfx.drawLine(gfx.width() / 2, gfx.height() / 2, x, gfx.height() - 1);
@@ -57,17 +56,19 @@ void loop() {
 
     delay(1000);
 
-    gfx.fill(MODE_CLEAR);
+    gfx.clear();
     gfx.drawRectangle(0, 0, gfx.width(), gfx.height());
     gfx.update();
     delay(2000);
 
-    gfx.fill(MODE_SET);
-    gfx.drawRectangle(1, 1, gfx.width()-2, gfx.height()-2, MODE_CLEAR);
+    gfx.fill();
+    gfx.setMode(MODE_CLEAR);
+    gfx.drawRectangle(1, 1, gfx.width()-2, gfx.height()-2);
+    gfx.setMode(MODE_SET);
     gfx.update();
     delay(2000);
 
-    gfx.fill(MODE_CLEAR);
+    gfx.clear();
 //    lcd.drawBitmap(16, 0, heart);
     gfx.update();
     delay(2000);

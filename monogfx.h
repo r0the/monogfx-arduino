@@ -45,23 +45,26 @@ class MonoGfx {
 public:
     explicit MonoGfx(Display* display);
     ~MonoGfx();
+    void clear();
     void debugBegin();
     void debugShow();
-    void drawBitmapPgm(int16_t x, int16_t y, const uint8_t* pgmBitmap, uint16_t width, uint16_t height, uint8_t mode = MODE_SET);
-    int16_t drawCharacter(int16_t x, int16_t y, char ch, uint8_t mode = MODE_SET);
-    void drawCircle(int16_t centerX, int16_t centerY, uint16_t radius, uint8_t mode = MODE_SET);
-    void drawHorizontalLine(int16_t x1, int16_t y, int16_t x2, uint8_t mode = MODE_SET);
-    void drawLine(int16_t x1, int16_t y1, int16_t x2, int16_t y2, uint8_t mode = MODE_SET);
-    void drawPixel(int16_t x, int16_t y, uint8_t mode = MODE_SET);
-    void drawRectangle(int16_t left, int16_t top, uint16_t width, uint16_t height, uint8_t mode = MODE_SET);
-    int16_t drawText(int16_t x, int16_t y, const char* text, uint8_t mode = MODE_SET);
-    void drawVerticalLine(int16_t x, int16_t y1, int16_t y2, uint8_t mode = MODE_SET);
-    void fill(uint8_t mode = MODE_SET);
-    void fillRectangle(int16_t left, int16_t top, uint16_t width, uint16_t height, uint8_t mode = MODE_SET);
+    void drawBitmapPgm(int16_t x, int16_t y, const uint8_t* pgmBitmap, uint16_t width, uint16_t height);
+    int16_t drawCharacter(int16_t x, int16_t y, char ch);
+    void drawCircle(int16_t centerX, int16_t centerY, uint16_t radius);
+    void drawHorizontalLine(int16_t x1, int16_t y, int16_t x2);
+    void drawLine(int16_t x1, int16_t y1, int16_t x2, int16_t y2);
+    void drawPixel(int16_t x, int16_t y);
+    void drawRectangle(int16_t left, int16_t top, uint16_t width, uint16_t height);
+    int16_t drawText(int16_t x, int16_t y, const char* text);
+    void drawVerticalLine(int16_t x, int16_t y1, int16_t y2);
+    void fill();
+    void fillRectangle(int16_t left, int16_t top, uint16_t width, uint16_t height);
+    inline uint8_t fontScale() const { return _fontScale; }
     inline uint8_t height() const { return _height; }
+    inline uint8_t mode() const { return _mode; }
     void setFont(Font* font);
     void setFontScale(uint8_t fontScale);
-    inline uint8_t fontScale() const { return _fontScale; }
+    void setMode(uint8_t mode);
     void setTextAlign(uint8_t textAlign);
     inline uint8_t textAlign() const { return _textAlign; }
     uint16_t textWidth(const char* text) const;
@@ -73,6 +76,7 @@ private:
     Font* _font;
     uint8_t _fontScale;
     uint16_t _height;
+    uint8_t _mode;
     uint8_t _textAlign;
     uint16_t _width;
 };
