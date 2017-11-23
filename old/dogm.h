@@ -29,9 +29,9 @@
 #ifndef DOGM_H
 #define DOGM_H
 
-#include "monogfx.h"
+#include "display.h"
 
-class DOGM : public MonoGfx {
+class DOGM : public Display {
 public:
     DOGM(uint8_t csPin, uint8_t resetPin, uint8_t a0Pin, uint8_t clockPin, uint8_t dataPin,
          uint8_t columns, uint8_t pages);

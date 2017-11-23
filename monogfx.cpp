@@ -28,191 +28,46 @@
 
 #include "monogfx.h"
 
-//#if !defined(__INT_MAX__) || (__INT_MAX__ > 0xFFFF)
-//    #define pgm_read_ptr(addr) pgm_read_ptr_far(addr)
-//#else
-//    #define pgm_read_ptr(addr) pgm_read_ptr_near(addr)
-//#endif
-
-
-PROGMEM const uint8_t DefaultFontBitmaps[] PROGMEM = {
-    B00000000, B00000000, B00000000, B00000000, B00000000, 3, // SPACE
-    B01011111, B00000000, B00000000, B00000000, B00000000, 1, // !
-    B00000011, B00000000, B00000011, B00000000, B00000000, 3, // "
-    B00010100, B01111111, B00010100, B01111111, B00010100, 5, // #
-    B00100100, B00101010, B01101011, B00101010, B00010010, 5, // $
-    B00100011, B00010011, B00001000, B01100100, B01100010, 5, // %
-    B00000000, B00000000, B00000000, B00000000, B00000000, 0, // & TODO
-    B00000011, B00000000, B00000000, B00000000, B00000000, 1, // '
-
-    B00011100, B00100010, B01000001, B00000000, B00000000, 3, // (
-    B01000001, B00100010, B00011100, B00000000, B00000000, 3, // )
-    B00101010, B00011100, B00111110, B00011100, B00101010, 5, // * IMPROVE
-    B00001000, B00001000, B00111110, B00001000, B00001000, 5, // +
-    B10000000, B01000000, B00000000, B00000000, B00000000, 2, // ,
-    B00001000, B00001000, B00001000, B00001000, B00001000, 5, // -
-    B01000000, B01000000, B00000000, B00000000, B00000000, 1, // .
-    B00100000, B00010000, B00001000, B00000100, B00000010, 5, // /
-
-    B00111110, B01010001, B01001001, B01000101, B00111110, 5, // 0
-    B01000100, B01000010, B01111111, B01000000, B01000000, 5, // 1
-    B01100010, B01010001, B01001001, B01001001, B01000110, 5, // 2
-    B00100010, B01000001, B01001001, B01001001, B00110110, 5, // 3
-    B00011000, B00010100, B00010010, B01111111, B00010000, 5, // 4
-    B00100111, B01000101, B01000101, B01000101, B00111001, 5, // 5
-    B00111100, B01001010, B01001001, B01001001, B00110000, 5, // 6
-    B00000001, B01110001, B00001001, B00000101, B00000011, 5, // 7
-
-    B00110110, B01001001, B01001001, B01001001, B00110110, 5, // 8
-    B00000110, B01001001, B01001001, B00101001, B00011110, 5, // 9
-    B01001000, B00000000, B00000000, B00000000, B00000000, 1, // :
-    B10000000, B01001000, B00000000, B00000000, B00000000, 2, // ;
-    B00001000, B00010100, B00100010, B01000001, B00000000, 4, // <
-    B00010100, B00010100, B00010100, B00010100, B00010100, 5, // =
-    B01000001, B00100010, B00010100, B00001000, B00000000, 4, // >
-    B00000010, B00000001, B01010001, B00001001, B00000110, 5, // ?
-
-    B00111110, B01000001, B01011101, B01010101, B01011110, 5, // @
-    B01111110, B00001001, B00001001, B00001001, B01111110, 5, // A
-    B01111111, B01001001, B01001001, B01001001, B00110110, 5, // B
-    B00111110, B01000001, B01000001, B01000001, B00100010, 5, // C
-    B01111111, B01000001, B01000001, B00100010, B00011100, 5, // D
-    B01111111, B01001001, B01001001, B01001001, B01000001, 5, // E
-    B01111111, B00001001, B00001001, B00001001, B00000001, 5, // F
-    B00111110, B01000001, B01001001, B01001001, B00111010, 5, // G
-
-    B01111111, B00001000, B00001000, B00001000, B01111111, 5, // H
-    B01000001, B01111111, B01000001, B00000000, B00000000, 3, // I
-    B00110000, B01000000, B01000001, B00111111, B00000001, 5, // J
-    B01111111, B00001000, B00010100, B00100010, B01000001, 5, // K
-    B01111111, B01000000, B01000000, B01000000, B01000000, 5, // L
-    B01111111, B00000010, B00001100, B00000010, B01111111, 5, // M
-    B01111111, B00000100, B00001000, B00010000, B01111111, 5, // N
-    B00111110, B01000001, B01000001, B01000001, B00111110, 5, // O
-
-    B01111111, B00001001, B00001001, B00001001, B00000110, 5, // P
-    B00111110, B01000001, B01100001, B01000001, B10111110, 5, // Q
-    B01111111, B00001001, B00011001, B00101001, B01000110, 5, // R
-    B00100110, B01001001, B01001001, B01001001, B00110010, 5, // S
-    B00000001, B00000001, B01111111, B00000001, B00000001, 5, // T
-    B00111111, B01000000, B01000000, B01000000, B00111111, 5, // U
-    B00011111, B00100000, B01000000, B00100000, B00011111, 5, // V
-    B00111111, B01000000, B00111000, B01000000, B00111111, 5, // W
-
-    B01100011, B00010100, B00001000, B00010100, B01100011, 5, // X
-    B00000111, B00001000, B01110000, B00001000, B00000111, 5, // Y
-    B01100001, B01010001, B01001001, B01000101, B01000011, 5, // Z
-    B01111111, B01000001, B01000001, B00000000, B00000000, 3, // [
-    B00000010, B00000100, B00001000, B00010000, B00100000, 5, // backslash
-    B01000001, B01000001, B01111111, B00000000, B00000000, 3, // ]
-    B00000100, B00000010, B00000001, B00000010, B00000100, 5, // ^
-    B01000000, B01000000, B01000000, B01000000, B01000000, 5, // _
-    B00000001, B00000010, B00000000, B00000000, B00000000, 2, // back quote
-    B00100000, B01010100, B01010100, B01010100, B01111000, 5, // a
-    B01111111, B01000100, B01000100, B01000100, B00111000, 5, // b
-    B00111000, B01000100, B01000100, B01000100, B01001000, 5, // c
-    B00111000, B01000100, B01000100, B01000100, B01111111, 5, // d
-    B00111000, B01010100, B01010100, B01010100, B01011000, 5, // e
-    B00000100, B01111110, B00000101, B00000001, B00000000, 4, // f
-    B10011000, B10100100, B10100100, B10100100, B01111000, 5, // g
-    B01111111, B00000100, B00000100, B00000100, B01111000, 5, // h
-    B01000100, B01111101, B01000000, B00000000, B00000000, 3, // i
-    B01000000, B10000000, B10000100, B01111101, B00000000, 4, // j
-    B01111111, B00010000, B00101000, B01000100, B00000000, 4, // k
-    B01000001, B01111111, B01000000, B00000000, B00000000, 3, // l
-    B01111100, B00000100, B01111100, B00000100, B01111000, 5, // m
-    B01111100, B00000100, B00000100, B00000100, B01111000, 5, // n
-    B00111000, B01000100, B01000100, B01000100, B00111000, 5, // o
-    B11111100, B00100100, B00100100, B00100100, B00011000, 5, // p
-    B00011000, B00100100, B00100100, B00100100, B11111100, 5, // q
-    B00000100, B01111000, B00000100, B00000100, B00001000, 5, // r
-    B01001000, B01010100, B01010100, B01010100, B00100100, 5, // s
-    B00000100, B00111111, B01000100, B01000100, B00000000, 4, // t
-    B00111100, B01000000, B01000000, B01000000, B01111100, 5, // u
-    B00001100, B00110000, B01000000, B00110000, B00001100, 5, // v
-    B00111100, B01000000, B00111100, B01000000, B00111100, 5, // w
-    B01000100, B00101000, B00010000, B00101000, B01000100, 5, // x
-    B00011100, B10100000, B10100000, B10100000, B01111100, 5, // y
-    B01000100, B01100100, B01010100, B01001100, B01000100, 5, // z
-    B00001000, B00110110, B01000001, B01000001, B00000000, 4, // {
-    B01111111, B00000000, B00000000, B00000000, B00000000, 1, // |
-    B01000001, B01000001, B00110110, B00001000, B00000000, 4, // }
-    B00000010, B00000001, B00000010, B00000001, B00000000, 4, // ~
-};
-
-#define CHAR_BYTES 6
-#define MIN_CHAR 32
-#define MAX_CHAR 126
-
-static byte readFont(char ch, int offset) {
-    if (MIN_CHAR <= ch && ch <= MAX_CHAR) {
-        return pgm_read_byte_near(DefaultFontBitmaps + (ch - MIN_CHAR) * CHAR_BYTES + offset);
-    }
-    else {
-        return 0;
-    }
-}
-
-class Glyph {
-public:
-    Glyph(const GFXglyph* pgmGlyph, const uint8_t* pgmBitmap) :
-        _pgmGlyphBitmap(pgmBitmap + pgm_read_word(&pgmGlyph->bitmapOffset)),
-        _pgmGlyph(pgmGlyph) {
-    }
-
-    inline uint8_t operator[](uint8_t index) const { return pgm_read_byte(_pgmGlyphBitmap + index); }
-    inline uint8_t width() const { return pgm_read_byte(&_pgmGlyph->width); }
-    inline uint8_t height() const { return pgm_read_byte(&_pgmGlyph->height); }
-    inline uint8_t xAdvance() const { return pgm_read_byte(&_pgmGlyph->xAdvance); }
-    inline int8_t xOffset() const { return pgm_read_byte(&_pgmGlyph->xOffset); }
-    inline int8_t yOffset() const { return pgm_read_byte(&_pgmGlyph->yOffset); }
-private:
-    const uint8_t* _pgmGlyphBitmap;
-    const GFXglyph* _pgmGlyph;
-};
-
-class Font {
-public:
-    explicit Font(const GFXfont& pgmFont) {
-        assign(pgmFont);
-    }
-
-    void assign(const GFXfont& pgmFont) {
-        _first = pgm_read_byte(&pgmFont.first);
-        _last = pgm_read_byte(&pgmFont.last);
-        _pgmBitmap = reinterpret_cast<const uint8_t*>(pgm_read_ptr(&pgmFont.bitmap));
-        _pgmGlyphs = reinterpret_cast<const GFXglyph*>(pgm_read_ptr(&pgmFont.glyph));
-        _yAdvance = pgm_read_byte(&pgmFont.yAdvance);
-    }
-
-    Glyph glyph(char ch) const {
-        return Glyph(_pgmGlyphs + (ch - _first), _pgmBitmap);
-    }
-
-    inline char first() const { return _first; }
-    inline char last() const { return _last; }
-    inline uint8_t yAdvance() const { return _yAdvance; }
-private:
-    char _first;
-    char _last;
-    const uint8_t* _pgmBitmap;
-    const GFXglyph* _pgmGlyphs;
-    uint8_t _yAdvance;
-};
-
-MonoGfx::MonoGfx(uint8_t width, uint8_t height) :
-    _dirty(false),
-    _font(NULL),
+MonoGfx::MonoGfx(Display* display) :
+    _buffer(new uint8_t[display->width() * display->height() / 8]),
+    _display(display),
+    _font(&DEFAULT_FONT),
     _fontScale(1),
-    _height(height),
-    _width(width) {
+    _height(display->height()),
+    _width(display->width())
+{
+    fill(MODE_CLEAR);
 }
 
-void MonoGfx::drawBitmap(uint8_t x, uint8_t y, const uint8_t* pgmBitmap, uint8_t w, uint8_t h, uint8_t mode) {
-    const uint8_t byteWidth = (w + 7) / 8;
+MonoGfx::~MonoGfx() {
+    delete[] _buffer;
+}
+
+void MonoGfx::debugBegin() {
+    Serial.begin(9600);
+    while (!Serial) {
+        delay(1);
+    }
+}
+
+void MonoGfx::debugShow() {
+    Serial.println();
+    for (uint16_t y = 0; y < _height; ++y) {
+        for (uint8_t x = 0; x < _width; ++x) {
+            uint16_t pos = _width * (y / 8) + x;
+            uint8_t bit = 1 << (y % 8);
+            Serial.print(_buffer[pos] & bit ? "0" : " ");
+        }
+
+        Serial.println();
+    }
+}
+
+void MonoGfx::drawBitmapPgm(int16_t x, int16_t y, const uint8_t* pgmBitmap, uint16_t width, uint16_t height, uint8_t mode) {
+    const uint8_t byteWidth = (width + 7) / 8;
     uint8_t data;
-    for(uint8_t yi = 0; yi < h; ++yi) {
-        for(uint8_t xi = 0; xi < w; ++xi) {
+    for(uint16_t yi = 0; yi < height; ++yi) {
+        for(uint16_t xi = 0; xi < width; ++xi) {
             if (xi & 7) {
                 data >>= 1;
             }
@@ -227,16 +82,40 @@ void MonoGfx::drawBitmap(uint8_t x, uint8_t y, const uint8_t* pgmBitmap, uint8_t
     }
 }
 
-void MonoGfx::drawCircle(uint8_t xm, uint8_t ym, uint8_t r, uint8_t mode) {
-    int16_t x = -r;
+
+int16_t MonoGfx::drawCharacter(int16_t x, int16_t y, char ch, uint8_t mode) {
+    uint8_t charWidth = _font->glyphWidth(ch);
+    uint8_t data;
+    for (uint8_t i = 0; i < charWidth; ++i) {
+        data = _font->glyphData(ch, i);
+        for (uint8_t yi = 0; yi < 8; ++yi) {
+            if (data & 1) {
+                for (uint8_t sx = 0; sx < _fontScale; ++sx) {
+                    for (uint8_t sy = 0; sy < _fontScale; ++sy) {
+                        drawPixel(x + sx, y + (yi - 7) * _fontScale + sy, mode);
+                    }
+                }
+            }
+
+            data >>= 1;
+        }
+   
+        x += _fontScale;
+    }
+
+    return x + _fontScale;
+}
+
+void MonoGfx::drawCircle(int16_t centerX, int16_t centerY, uint16_t radius, uint8_t mode) {
+    int16_t x = -radius;
     int16_t y = 0;
-    int16_t err = 2 - 2 * r;
+    int16_t err = 2 - 2 * radius;
     int16_t oldErr;
     do {
-        drawPixel(xm - x, ym + y, mode);
-        drawPixel(xm - y, ym - x, mode);
-        drawPixel(xm + x, ym - y, mode);
-        drawPixel(xm + y, ym + x, mode);
+        drawPixel(centerX - x, centerY + y, mode);
+        drawPixel(centerX - y, centerY - x, mode);
+        drawPixel(centerX + x, centerY - y, mode);
+        drawPixel(centerX + y, centerY + x, mode);
         oldErr = err;
         if (oldErr <= y) {
             ++y;
@@ -250,7 +129,18 @@ void MonoGfx::drawCircle(uint8_t xm, uint8_t ym, uint8_t r, uint8_t mode) {
     } while (x < 0);
 }
 
-void MonoGfx::drawLine(uint8_t x1, uint8_t y1, uint8_t x2, uint8_t y2, uint8_t mode) {
+void MonoGfx::drawHorizontalLine(int16_t x1, int16_t y, int16_t x2, uint8_t mode) {
+    if (x1 > x2) {
+        return;
+    }
+
+    while (x1 <= x2) {
+        drawPixel(x1, y, mode);
+        ++x1;
+    }
+}
+
+void MonoGfx::drawLine(int16_t x1, int16_t y1, int16_t x2, int16_t y2, uint8_t mode) {
    int16_t dx = abs(x2 - x1);
    int16_t sx = x1 < x2 ? 1 : -1;
    int16_t dy = -abs(y2 - y1);
@@ -276,62 +166,40 @@ void MonoGfx::drawLine(uint8_t x1, uint8_t y1, uint8_t x2, uint8_t y2, uint8_t m
     }
 }
 
-void MonoGfx::fill(uint8_t mode) {
-    for (uint8_t x = 0; x < _width; ++x) {
-        doDrawVLine(x, 0, _height, mode);
+void MonoGfx::drawPixel(int16_t x, int16_t y, uint8_t mode) {
+    if (x < 0 || _width <= x || y < 0 || _height <= y) {
+        return;
+    }
+
+    uint16_t pos = _width * (y / 8) + x;
+    uint8_t bit = 1 << (y % 8);
+    switch (mode) {
+        case MODE_SET:
+            _buffer[pos] = _buffer[pos] | bit;
+            break;
+        case MODE_CLEAR:
+            _buffer[pos] = _buffer[pos] & ~bit;
+            break;
+        case MODE_INVERT:
+            _buffer[pos] = _buffer[pos] ^ bit;
+            break;
     }
 }
 
-void MonoGfx::drawPixel(uint8_t x, uint8_t y, uint8_t mode) {
-    if (0 <= x && x < _width && 0 <= y && y < _height) {
-        doDrawPixel(x, y, mode);
+void MonoGfx::drawRectangle(int16_t left, int16_t top, uint16_t width, uint16_t height, uint8_t mode) {
+    if (width <= 0 || height <= 0) {
+        return;
     }
+
+    const int16_t right = left + width - 1;
+    const int16_t bottom = top + height - 1;
+    drawHorizontalLine(left, top, right, mode);
+    drawHorizontalLine(left, bottom, right, mode);
+    drawVerticalLine(left, top, bottom, mode);
+    drawVerticalLine(right, top, bottom, mode);
 }
 
-void MonoGfx::drawRect(uint8_t x, uint8_t y, uint8_t width, uint8_t height, uint8_t mode) {
-    doDrawHLine(x, y, width, mode);
-    doDrawHLine(x, y + height - 1, width, mode);
-    doDrawVLine(x, y, height, mode);
-    doDrawVLine(x + width - 1, y, height, mode);
-}
-
-void MonoGfx::fillRect(uint8_t x, uint8_t y, uint8_t width, uint8_t height, uint8_t mode) {
-    doFillRect(x, y, width, height, mode);
-}
-
-void MonoGfx::setBackgroundColor(uint8_t red, uint8_t green, uint8_t blue) {
-    doSetBackgroundColor(red, green, blue);
-}
-
-void MonoGfx::setFont(const GFXfont& pgmFont) {
-    delete _font;
-    _font = new Font(pgmFont);
-}
-
-void MonoGfx::setFontScale(uint8_t fontScale) {
-    if (fontScale > 0) {
-        _fontScale = fontScale;
-    }
-}
-
-void MonoGfx::setForegroundColor(uint8_t red, uint8_t green, uint8_t blue) {
-    doSetForegroundColor(red, green, blue);
-}
-
-void MonoGfx::setTextAlign(uint8_t textAlign) {
-    if (textAlign <= ALIGN_CENTER) {
-        _textAlign = textAlign;
-    }
-}
-
-void MonoGfx::update() {
-    if (_dirty) {
-        doUpdate(_dirtyLeft, _dirtyTop, _dirtyRight, _dirtyBottom);
-        _dirty = false;
-    }
-}
-
-uint8_t MonoGfx::write(uint8_t x, uint8_t y, const char* text, uint8_t mode) {
+int16_t MonoGfx::drawText(int16_t x, int16_t y, const char* text, uint8_t mode) {
     uint8_t i = 0;
     switch (_textAlign) {
         case ALIGN_RIGHT:
@@ -343,127 +211,74 @@ uint8_t MonoGfx::write(uint8_t x, uint8_t y, const char* text, uint8_t mode) {
     }
 
     while (text[i] != '\0') {
-        if (_font) {
-            x = writeCharGfx(x, y, text[i], mode);
-        }
-        else {
-            x = writeCharDefault(x, y, text[i], mode);
-        }
-
+        x = drawCharacter(x, y, text[i], mode);
         ++i;
     }
 
     return x;
 }
 
-void MonoGfx::dirty(uint8_t left, uint8_t top, uint8_t right, uint8_t bottom) {
-    if (_dirty) {
-        _dirtyLeft = min(_dirtyLeft, left);
-        _dirtyTop = min(_dirtyTop, top);
-        _dirtyRight = min(_width - 1, max(_dirtyRight, right));
-        _dirtyBottom = min(_height - 1, max(_dirtyBottom, bottom));
+void MonoGfx::drawVerticalLine(int16_t x, int16_t y1, int16_t y2, uint8_t mode) {
+    if (y1 > y2) {
+        return;
     }
-    else {
-        _dirty = true;
-        _dirtyLeft = left;
-        _dirtyTop = top;
-        _dirtyRight = right;
-        _dirtyBottom = bottom;
+
+    while (y1 <= y2) {
+        drawPixel(x, y1, mode);
+        ++y1;
     }
 }
 
-void MonoGfx::doDrawHLine(uint8_t x, uint8_t y, uint8_t length, uint8_t mode) {
-    while (length > 0) {
-        doDrawPixel(x, y, mode);
-        ++x;
-        --length;
+void MonoGfx::fill(uint8_t mode) {
+    for (int16_t x = 0; x < _width; ++x) {
+        drawVerticalLine(x, 0, _height, mode);
     }
 }
 
-void MonoGfx::doDrawVLine(uint8_t x, uint8_t y, uint8_t length, uint8_t mode) {
-    while (length > 0) {
-        doDrawPixel(x, y, mode);
-        ++y;
-        --length;
+void MonoGfx::fillRectangle(int16_t left, int16_t top, uint16_t width, uint16_t height, uint8_t mode) {
+    if (width <= 0 || height <= 0) {
+        return;
+    }
+
+    const int16_t right = left + width - 1;
+    const int16_t bottom = top + height - 1;
+    while (top <= bottom) {
+        drawHorizontalLine(left, right, top, mode);
     }
 }
 
-void MonoGfx::doFillRect(uint8_t x, uint8_t y, uint8_t width, uint8_t height, uint8_t mode) {
-    for (uint8_t i = x; i < x + width; ++i) {
-        doDrawVLine(i, y, height, mode);
+void MonoGfx::setFont(Font* font) {
+    _font = font;
+}
+
+void MonoGfx::setFontScale(uint8_t fontScale) {
+    if (fontScale == 0) {
+        return;
     }
+
+    _fontScale = fontScale;
 }
 
-void MonoGfx::doSetBackgroundColor(uint8_t red, uint8_t green, uint8_t blue) {
+void MonoGfx::setTextAlign(uint8_t textAlign) {
+    if (textAlign > ALIGN_CENTER) {
+        return;
+    }
+
+    _textAlign = textAlign;
 }
 
-void MonoGfx::doSetForegroundColor(uint8_t red, uint8_t green, uint8_t blue) {
-}
-
-uint8_t MonoGfx::textWidth(const char* text) const {
+uint16_t MonoGfx::textWidth(const char* text) const {
     uint8_t result = 0;
     uint8_t i = 0;
     while (text[i] != '\0') {
-        if (_font) {
-            Glyph glyph = _font->glyph(text[i]);
-            result += glyph.width() + glyph.xAdvance();
-        }
-        else {
-            result += (readFont(text[i], CHAR_BYTES - 1) + 1) * _fontScale;
-        }
-
+        result += (_font->glyphWidth(text[i]) + 1) * _fontScale;
         ++i;
     }
 
     return result - 1;
 }
 
-uint8_t MonoGfx::writeCharGfx(uint8_t x, uint8_t y, char ch, uint8_t mode) {
-    Glyph glyph = _font->glyph(ch);
-    uint8_t h = glyph.height();
-    uint8_t w = glyph.width();
-    int8_t xOffset = glyph.xOffset();
-    int8_t yOffset = glyph.yOffset();
-    uint8_t data;
-    uint8_t bit = 0;
-    for (uint8_t yi = 0; yi < h; ++yi) {
-        for (uint8_t xi = 0; xi < w; ++xi) {
-            if (bit % 8 == 0) {
-                data = glyph[bit / 8];
-            }
-
-            if (data & 0x80) {
-                drawPixel(x + xOffset + xi, y + yOffset + yi, mode);
-            }
-
-            data <<= 1;
-            ++bit;
-        }
-    }
-
-    return x + glyph.xAdvance();
-}
-
-uint8_t MonoGfx::writeCharDefault(uint8_t x, uint8_t y, char ch, uint8_t mode) {
-    uint8_t charWidth = readFont(ch, CHAR_BYTES - 1);
-    uint8_t data;
-    for (uint8_t i = 0; i < charWidth; ++i) {
-        data = readFont(ch, i);
-        for (uint8_t yi = 0; yi < 8; ++yi) {
-            if (data & 1) {
-                for (uint8_t sx = 0; sx < _fontScale; ++sx) {
-                    for (uint8_t sy = 0; sy < _fontScale; ++sy) {
-                        drawPixel(x + sx, y + (yi - 7) * _fontScale + sy, mode);
-                    }
-                }
-            }
-
-            data >>= 1;
-        }
-   
-        x += _fontScale;
-    }
-
-    return x + 1;
+void MonoGfx::update() {
+    _display->update(_buffer, 0, 0, _width-1, _height-1);
 }
 

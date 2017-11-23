@@ -83,8 +83,7 @@ static uint16_t color8bit(uint8_t red, uint8_t green, uint8_t blue) {
 }
 
 SSD1331::SSD1331(uint8_t csPin, uint8_t resetPin, uint8_t dcPin) :
-    MonoGfx(DISPLAY_WIDTH, DISPLAY_HEIGHT),
-    _buffer(new uint8_t[DISPLAY_WIDTH * DISPLAY_HEIGHT / 8]),
+    Display(),
     _csPin(csPin),
     _dcPin(dcPin),
     _resetPin(resetPin) {
@@ -125,8 +124,10 @@ void SSD1331::begin() {
     SPI.transfer(0);
     // set normal display mode
     SPI.transfer(CMD_SET_DISPLAY_MODE_NORMAL);
+    // set multiplex ratio
     SPI.transfer(CMD_SET_MULTIPLEX_RATIO);
     SPI.transfer(0x3F);
+    // dry master configuration
     SPI.transfer(CMD_SET_MASTER_CONFIGURATION);
     SPI.transfer(0x8E);
     // disable power save mode
@@ -178,33 +179,38 @@ void SSD1331::begin() {
     endTransfer();
 }
 
-void SSD1331::doDrawPixel(uint8_t x, uint8_t y, uint8_t mode) {
-    uint8_t bit = 1 << (y % 8);
-    uint16_t pos = DISPLAY_WIDTH * (y / 8) + x;
-    switch (mode) {
-        case MODE_SET:
-            _buffer[pos] = _buffer[pos] | bit;
-            break;
-        case MODE_CLEAR:
-            _buffer[pos] = _buffer[pos] & ~bit;
-            break;
-        case MODE_INVERT:
-            _buffer[pos] = _buffer[pos] ^ bit;
-            break;
-    }
-
-    dirty(x, y, x, y);
+uint16_t SSD1331::height() const {
+    return DISPLAY_HEIGHT;
 }
 
-void SSD1331::doSetBackgroundColor(uint8_t red, uint8_t green, uint8_t blue) {
+void SSD1331::turnOn() {
+    digitalWrite(_dcPin, LOW);
+    digitalWrite(_csPin, LOW);
+    SPI.transfer(CMD_SET_DISPLAY_ON);
+    digitalWrite(_csPin, HIGH);
+}
+
+void SSD1331::turnOff() {
+    digitalWrite(_dcPin, LOW);
+    digitalWrite(_csPin, LOW);
+    SPI.transfer(CMD_SET_DISPLAY_SLEEP);
+    digitalWrite(_csPin, HIGH);
+}
+
+uint16_t SSD1331::width() const {
+    return DISPLAY_WIDTH;
+}
+
+
+void SSD1331::setBackgroundColor(uint8_t red, uint8_t green, uint8_t blue) {
     _backgroundColor = color8bit(red, green, blue);
 }
 
-void SSD1331::doSetForegroundColor(uint8_t red, uint8_t green, uint8_t blue) {
+void SSD1331::setForegroundColor(uint8_t red, uint8_t green, uint8_t blue) {
     _foregroundColor = color8bit(red, green, blue);
 }
 
-void SSD1331::doUpdate(uint8_t left, uint8_t top, uint8_t right, uint8_t bottom) {
+void SSD1331::update(uint8_t* buffer, uint16_t left, uint16_t top, uint16_t right, uint16_t bottom) {
     startTransfer(true);
     SPI.transfer(CMD_SET_COLUMN_ADDRESS);
     SPI.transfer(left);
@@ -214,10 +220,10 @@ void SSD1331::doUpdate(uint8_t left, uint8_t top, uint8_t right, uint8_t bottom)
     SPI.transfer(bottom);
     startTransfer(false);
     for (uint8_t y = top; y < bottom + 1; ++y) {
+        uint8_t bit = 1 << (y % 8);
+        uint16_t pos = DISPLAY_WIDTH * (y / 8);
         for (uint8_t x = left; x < right + 1; ++x) {
-            uint8_t bit = 1 << (y % 8);
-            uint16_t pos = DISPLAY_WIDTH * (y / 8) + x;
-            if (_buffer[pos] & bit) {
+            if (buffer[pos + x] & bit) {
                 SPI.transfer(_foregroundColor);
             }
             else {
