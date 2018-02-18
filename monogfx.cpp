@@ -1,7 +1,7 @@
 /*
  * BSD 2-Clause License
  *
- * Copyright (c) 2017, Stefan Rothe
+ * Copyright (c) 2017 - 2018, Stefan Rothe
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -28,14 +28,14 @@
 
 #include "monogfx.h"
 
-MonoGfx::MonoGfx(Display* display) :
-    _buffer(new uint8_t[display->width() * display->height() / 8]),
-    _display(display),
+MonoGfx::MonoGfx(uint16_t width, uint16_t height) :
+    _buffer(new uint8_t[width * height / 8]),
     _font(&DEFAULT_FONT),
     _fontScale(1),
-    _height(display->height()),
+    _height(height),
     _mode(MODE_SET),
-    _width(display->width())
+    _ready(false),
+    _width(width)
 {
     clear();
 }
@@ -44,10 +44,12 @@ MonoGfx::~MonoGfx() {
     delete[] _buffer;
 }
 
+void MonoGfx::begin() {
+    _ready = doInitialize();
+}
+
 void MonoGfx::clear() {
-    for (int16_t i = 0; i < _width * _height / 8; ++i) {
-        _buffer[i] = 0x00;
-    }
+    memset(_buffer, 0, _width * _height / 8);
 }
 
 void MonoGfx::debugBegin() {
@@ -294,6 +296,6 @@ uint16_t MonoGfx::textWidth(const char* text) const {
 }
 
 void MonoGfx::update() {
-    _display->update(_buffer, 0, 0, _width-1, _height-1);
+    doUpdate(_buffer, 0, 0, _width-1, _height-1);
 }
 

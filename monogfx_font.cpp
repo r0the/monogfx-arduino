@@ -1,7 +1,7 @@
 /*
  * BSD 2-Clause License
  *
- * Copyright (c) 2017, Stefan Rothe
+ * Copyright (c) 2017 - 2018, Stefan Rothe
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -31,8 +31,6 @@
 #define FIXED_WIDTH_FONT_OFFSET 4
 
 PROGMEM const uint8_t DEFAULT_FONT_PGM[] PROGMEM = {
-    ' ', // first character
-    '~', // last character
     3, B00000000, B00000000, B00000000, // SPACE
     1, B01011111, // !
     3, B00000011, B00000000, B00000011, // "
@@ -141,19 +139,20 @@ PROGMEM const uint8_t DEFAULT_FONT_PGM[] PROGMEM = {
     4, B00000010, B00000001, B00000010, B00000001, // ~
 };
 
-VariableWidthFont DEFAULT_FONT = VariableWidthFont(DEFAULT_FONT_PGM);
+VariableWidthFont DEFAULT_FONT = VariableWidthFont(' ', '~', 8, DEFAULT_FONT_PGM);
 
 Font::~Font() {
 }
 
-VariableWidthFont::VariableWidthFont(const uint8_t* pgmPtr) :
+VariableWidthFont::VariableWidthFont(char firstChar, char lastChar, uint8_t height, const uint8_t* pgmPtr) :
+    _firstChar(firstChar),
+    _height(height),
+    _lastChar(lastChar),
     _pgmPtr(pgmPtr)
 {
-    _firstChar = pgm_read_byte_far(_pgmPtr);
-    _lastChar = pgm_read_byte_far(_pgmPtr + 1);
     uint8_t charCount = _lastChar - _firstChar + 1;
     _charOffset = new uint16_t[charCount];
-    uint16_t offset = 2;
+    uint16_t offset = 0;
     for (uint8_t i = 0; i < charCount; ++i) {
         _charOffset[i] = offset;
         offset += pgm_read_byte_far(_pgmPtr + offset) + 1;
@@ -184,35 +183,40 @@ uint8_t VariableWidthFont::glyphWidth(char ch) const {
     return pgm_read_byte_far(_pgmPtr + _charOffset[ch - _firstChar]);
 }
 
-FixedWidthFont::FixedWidthFont(const uint8_t* pgmPtr) :
-    _pgmPtr(pgmPtr + FIXED_WIDTH_FONT_OFFSET)
+VariableFont::VariableFont(char firstChar, char lastChar, const uint8_t* pgmPtr) :
+    _firstChar(firstChar),
+    _lastChar(lastChar),
+    _pgmPtr(pgmPtr)
 {
-    _glyphWidth = pgm_read_byte_far(pgmPtr);
-    _glyphHeight = pgm_read_byte_far(pgmPtr + 1);
-    _firstChar = pgm_read_byte_far(pgmPtr + 2);
-    _lastChar = pgm_read_byte_far(pgmPtr + 3);
+    uint8_t charCount = _lastChar - _firstChar + 1;
+    _charOffset = new uint16_t[charCount];
+    uint16_t offset = 0;
+    for (uint8_t i = 0; i < charCount; ++i) {
+        _charOffset[i] = offset;
+        offset += pgm_read_byte_far(_pgmPtr + offset) + 1;
+    }
 }
 
-FixedWidthFont::~FixedWidthFont() {
+VariableFont::~VariableFont() {
 }
 
-uint8_t FixedWidthFont::glyphData(char ch, uint8_t i) const {
+uint8_t VariableFont::glyphData(char ch, uint8_t i) const {
+    if (ch < _firstChar || _lastChar < ch) {
+        return 0;
+    }
+    
+    return pgm_read_byte_far(_pgmPtr + _charOffset[ch - _firstChar] + 1 + i);
+}
+
+uint8_t VariableFont::glyphHeight() const {
+    return 8;
+}
+
+uint8_t VariableFont::glyphWidth(char ch) const {
     if (ch < _firstChar || _lastChar < ch) {
         return 0;
     }
 
-    return pgm_read_byte_near(_pgmPtr + (ch - _firstChar) * _glyphWidth + i);
-}
-
-uint8_t FixedWidthFont::glyphHeight() const {
-    return _glyphHeight;
-}
-
-uint8_t FixedWidthFont::glyphWidth(char ch) const {
-    if (ch < _firstChar || _lastChar < ch) {
-        return 0;
-    }
-
-    return _glyphWidth;
+    return pgm_read_byte_far(_pgmPtr + _charOffset[ch - _firstChar]);
 }
 

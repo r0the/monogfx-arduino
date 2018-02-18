@@ -47,6 +47,9 @@ class BoundingBox:
 
 
     def parse(self, value: str) -> None:
+        """
+        Parses a bounding box from a BDF file.
+        """
         parts = value.split(' ')
         self._width = int(parts[0])
         self._height = int(parts[1])
@@ -76,7 +79,7 @@ class BoundingBox:
         return self._width
 
 
-    def __str__(self):
+    def __str__(self) -> str:
         """
         Returns a textual representation of this glyph.
         """
@@ -88,34 +91,42 @@ class Font:
     Represents a bitmap font.
     """
     def __init__(self):
-        self.comments = []
-        self.glyphs = {}
-        self.bounding_box = BoundingBox()
+        self._bounding_box = BoundingBox()
+        self._comments = []
+        self._glyphs = {}
         return
 
 
-    def bytes_per_column() -> int:
-        return (self.bounding_box.height() + 1) // 8
+    def append_comment(self, comment: str) -> None:
+        self._comments.append(comment)
+        return
 
 
-    def height(self) -> int:
-        return self.bounding_box.height()
+    def bounding_box(self):
+        return self._bounding_box
+
+
+    def glyph(self, char: str):
+        if char in self._glyphs:
+            return self._glyphs[char]
+        else:
+            return Glyph(self, code=int(char))
 
 
 class Glyph:
     """
     Represents a bitmap glyph.
     """
-    def __init__(self, font):
-        self._code = 0
+    def __init__(self, font, code=0):
+        self._bounding_box = BoundingBox()
+        self._code = code
         self._data = bytearray()
         self._font = font
-        self.bounding_box = BoundingBox()
         return
 
 
     def bit_set(self, x: int, y: int):
-        bbx = self.bounding_box
+        bbx = self._bounding_box
         byte_width = bbx.byte_width()
         if bbx.contains(x, y):
             x -= bbx.left()
@@ -135,15 +146,20 @@ class Glyph:
         return chr(self._code)
 
 
-    def data(self):
-        return self._data
+    def range_x(self):
+        return range(self._font.bounding_box().left(), self._bounding_box.right())
+
+
+    def range_y(self):
+        bbx = self._font.bounding_box()
+        return range(bbx.top() - 1, bbx.bottom() - 1, -1)
 
 
     def width(self):
         """
         Returns the actual width of this glyph in pixels.
         """
-        return self._width
+        return self._bounding_box.width()
 
 
     def unicode_str(self):
@@ -162,15 +178,15 @@ class Glyph:
         Returns a textual representation of this glyph.
         """
         result = ''
-        bbx = self._font.bounding_box
-        for y in range(bbx.bottom(), bbx.top()):
+        bbx = self._font.bounding_box()
+        for y in self.range_y():
             line = ''
-            for x in range(bbx.left(), bbx.right()):
+            for x in self.range_x():
                 if self.bit_set(x, y):
                     line += 'X'
                 else:
                     line += '.'
-            result = line + '\n' + result
+            result += line + '\n'
         return result
 
 
@@ -186,7 +202,7 @@ class Reader:
 
 
     def parse_comment(self, value: str):
-        self._font.comments.append(value)
+        self._font.append_comment(value)
         return
 
 
@@ -208,17 +224,17 @@ class Reader:
             code = int(parts[1])
 
         self._current_glyph._code = code
-        self._font.glyphs[code] = self._current_glyph
+        self._font._glyphs[code] = self._current_glyph
         return
 
 
     def parse_font_bounding_box(self, value):
-        self._font.bounding_box.parse(value)
+        self._font.bounding_box().parse(value)
         return
 
 
     def parse_bbx(self, value: str):
-        self._current_glyph.bounding_box.parse(value)
+        self._current_glyph._bounding_box.parse(value)
         return
 
 

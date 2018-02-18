@@ -1,7 +1,7 @@
 /*
  * BSD 2-Clause License
  *
- * Copyright (c) 2017, Stefan Rothe
+ * Copyright (c) 2017 - 2018, Stefan Rothe
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -30,7 +30,6 @@
 #define MONOGFX_H
 
 #include <Arduino.h>
-#include "monogfx_display.h"
 #include "monogfx_font.h"
 
 #define ALIGN_LEFT 0
@@ -43,8 +42,9 @@
 
 class MonoGfx {
 public:
-    explicit MonoGfx(Display* display);
+    explicit MonoGfx(uint16_t width, uint16_t height);
     ~MonoGfx();
+    void begin();
     void clear();
     void debugBegin();
     void debugShow();
@@ -60,8 +60,9 @@ public:
     void fill();
     void fillRectangle(int16_t left, int16_t top, uint16_t width, uint16_t height);
     inline uint8_t fontScale() const { return _fontScale; }
-    inline uint8_t height() const { return _height; }
+    inline uint16_t height() const { return _height; }
     inline uint8_t mode() const { return _mode; }
+    inline bool ready() const { return _ready; }
     void setFont(Font* font);
     void setFontScale(uint8_t fontScale);
     void setMode(uint8_t mode);
@@ -69,14 +70,18 @@ public:
     inline uint8_t textAlign() const { return _textAlign; }
     uint16_t textWidth(const char* text) const;
     void update();
-    inline uint8_t width() const { return _width; }
+    inline uint16_t width() const { return _width; }
+protected:
+    // hardware-specific implementation
+    virtual bool doInitialize() = 0;
+    virtual void doUpdate(uint8_t* buffer, uint16_t left, uint16_t top, uint16_t right, uint16_t bottom) = 0;
 private:
     uint8_t* _buffer;
-    Display* _display;
     Font* _font;
     uint8_t _fontScale;
     uint16_t _height;
     uint8_t _mode;
+    bool _ready;
     uint8_t _textAlign;
     uint16_t _width;
 };

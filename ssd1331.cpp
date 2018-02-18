@@ -1,7 +1,7 @@
 /*
  * BSD 2-Clause License
  *
- * Copyright (c) 2017, Stefan Rothe
+ * Copyright (c) 2017 - 2018, Stefan Rothe
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without
@@ -83,7 +83,7 @@ static uint16_t color8bit(uint8_t red, uint8_t green, uint8_t blue) {
 }
 
 SSD1331::SSD1331(uint8_t csPin, uint8_t resetPin, uint8_t dcPin) :
-    Display(),
+    MonoGfx(DISPLAY_WIDTH, DISPLAY_HEIGHT),
     _csPin(csPin),
     _dcPin(dcPin),
     _resetPin(resetPin) {

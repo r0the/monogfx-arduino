@@ -1,32 +1,63 @@
-#include "ssd1331.h"
+//#include "ssd1331.h"
+#include "ssd1306.h"
 #include "monogfx.h"
-#include "fonts/artos_sans_8x8.h"
-#include "fonts/victoria_8x8.h"
+#include <Wire.h>
+//#include "fonts/artos_sans_8.h"
+//#include "fonts/victoria.h"
+//#include "fonts/victoria_bold.h"
 
 
 
 //DOGM132 lcd(10, 11, 12, 8, 9);
-SSD1331 lcd(6, 13, 14);
-MonoGfx gfx(&lcd);
-//SSD1331 lcd(13, 11, 12);
+
+// 
+//SSD1331 lcd(6, 13, 14);
+
+// Feather 
+//SSD1331 lcd(5, 1, 0);
 //DOGM132 lcd(10, 11, 12);
 
+SSD1306 gfx(0x3C);
+
 void setup() {
-    pinMode(7, OUTPUT);
-    digitalWrite(7, HIGH);
-    delay(500);
-    lcd.begin();
-//    gfx.setFontScale(2);
-    lcd.setBackgroundColor(64+32, 0, 0);
-   //    lcd.setFont(FreeMono12pt7b);
+    Wire.begin();
+    Serial.begin(9600);
+    while (!Serial) {
+        delay(10);
+    }
+
+    Serial.println("Initializing display...");
+
+    gfx.begin();
+    Serial.println("Initialized display...");
+    if (!gfx.ready()) {
+        Serial.println("Display not found");
+    }
+    else {
+        Serial.println("Display ready");
+    }
+
+    gfx.turnOff();
+    delay(1000);
+        Serial.println("turn on...");
+    gfx.turnOn();
+    gfx.test(true);
+        Serial.println("test ...");
+    delay(1000);
+    gfx.test(false);
+    gfx.setInvert(true);
+
+    Serial.println("test donw");
 }
 
 void loop() {
     gfx.clear();
-    gfx.setFont(&FONT_VICTORIA_8x8);
-    gfx.drawText(0, 20, "ABCDefghi");
-    gfx.setFont(&FONT_ARTOS_SANS_8x8);
-    gfx.drawText(0, 40, "ABCDEFefghi");
+//    gfx.setFont(&FONT_VICTORIA);
+    gfx.drawText(0, 10, "Victoria");
+//    gfx.setFont(&FONT_VICTORIA_BOLD);
+    gfx.drawText(0, 20, "Victoria Bold");
+//    gfx.setFont(&FONT_ARTOS_SANS_8);
+    gfx.drawText(0, 30, "Artos Sans");
     gfx.update();
     delay(2000);
 

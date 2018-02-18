@@ -1,7 +1,7 @@
 /*
  * BSD 2-Clause License
  *
- * Copyright (c) 2017, Stefan Rothe
+ * Copyright (c) 2017 - 2018, Stefan Rothe
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -41,7 +41,7 @@ public:
 
 class VariableWidthFont : public Font {
 public:
-    explicit VariableWidthFont(const uint8_t* pgmPtr);
+    explicit VariableWidthFont(char firstChar, char lastChar, uint8_t height, const uint8_t* pgmPtr);
     virtual ~VariableWidthFont();
     virtual uint8_t glyphHeight() const;
     virtual uint8_t glyphData(char ch, uint8_t i) const;
@@ -49,21 +49,22 @@ public:
 private:
     uint16_t* _charOffset;
     char _firstChar;
+    uint8_t _height;
     char _lastChar;
     const uint8_t* _pgmPtr;
 };
 
-class FixedWidthFont : public Font {
+class VariableFont : public Font {
 public:
-    explicit FixedWidthFont(const uint8_t* pgmPtr);
-    virtual ~FixedWidthFont();
+    explicit VariableFont(char firstChar, char lastChar, const uint8_t* pgmPtr);
+    virtual ~VariableFont();
     virtual uint8_t glyphHeight() const;
     virtual uint8_t glyphData(char ch, uint8_t i) const;
     virtual uint8_t glyphWidth(char ch) const;
 private:
+    uint16_t* _charOffset;
     char _firstChar;
-    uint8_t _glyphHeight;
-    uint8_t _glyphWidth;
+    uint8_t _height;
     char _lastChar;
     const uint8_t* _pgmPtr;
 };

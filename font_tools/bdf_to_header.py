@@ -3,7 +3,7 @@ import header_writer
 
 INPUT_FILE_NAME = '../bdf/Helvetica-10.bdf'
 OUTPUT_FILE_NAME = '../fonts/helvetica_10.h'
-VARIABLE_NAME = 'ARTOS_SANS_8'
+VARIABLE_NAME = 'HELVETICA_10'
 
 font = bdf.read(INPUT_FILE_NAME)
 

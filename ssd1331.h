@@ -1,7 +1,7 @@
 /*
  * BSD 2-Clause License
  *
- * Copyright (c) 2017, Stefan Rothe
+ * Copyright (c) 2017 - 2018, Stefan Rothe
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without
@@ -29,10 +29,9 @@
 #ifndef SSD1331_H
 #define SSD1331_H
 
-#include "Arduino.h"
-#include "monogfx_display.h"
+#include "monogfx.h"
 
-class SSD1331 : public Display {
+class SSD1331 : public MonoGfx {
 public:
     SSD1331(uint8_t csPin, uint8_t resetPin, uint8_t dcPin);
     void begin();
