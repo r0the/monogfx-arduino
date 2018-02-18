@@ -26,7 +26,9 @@ class Writer:
         self._file.write(str(font.bounding_box().height()))
         self._file.write(', ')
         self._file.write(self._variable_name)
-        self._file.write('_PGM);\n');
+        self._file.write('_BITMAP_PGM, ');
+        self._file.write(self._variable_name)
+        self._file.write('_DATA_PGM);\n');
         self._file.write('\n')
         self._file.close()
         return
@@ -44,19 +46,25 @@ class Writer:
 
 
     def write_glyph_bitmap(self, glyph):
-        print(glyph.unicode_str() + ' (' + glyph.char() + ')')
-        print(glyph)
         self.write_glyph_comment(glyph)
-        bit = 1
-        result = ''
-        for y in glyph.range_y():
-            line = ''
-            for x in glyph.range_x():
+        for x in glyph.range_x():
+            bit = 1
+            byte = 0
+            for y in glyph.range_y():
                 if glyph.bit_set(x, y):
-                    line += 'X'
+                    byte += bit
+                
+                if bit == 128:
+                    self.write_byte_hex(byte)
+                    self._file.write(', ')
+                    byte = 0
+                    bit = 1
                 else:
-                    line += '.'
-            result = line + '\n' + result
+                    bit *= 2
+                
+            if bit != 1:
+                self.write_byte_hex(byte)
+                self._file.write(', ')
 
         self._file.write('\n')
         return
@@ -87,11 +95,17 @@ class Writer:
 
     def write_glyph_data(self, glyph):
         self.write_glyph_comment(glyph)
-        self._file.write(str(self._bitmap_offset))
+        self.write_byte_hex(self._bitmap_offset // 255)
+        self._file.write(', ')
+        self.write_byte_hex(self._bitmap_offset & 255)
         self._file.write(', ')
         self._file.write(str(glyph.width()))
-        self._file.write(', ')
         self._file.write(',\n')
+        return
+    
+    
+    def write_byte_hex(self, byte):
+        self._file.write('0x{:02x}'.format(byte))
         return
 
 

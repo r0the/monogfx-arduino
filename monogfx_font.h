@@ -34,31 +34,36 @@
 class Font {
 public:
     virtual ~Font();
-    virtual uint8_t glyphHeight() const = 0;
+    virtual uint8_t byteHeight() const = 0;
+    virtual uint8_t fontHeight() const = 0;
     virtual uint8_t glyphData(char ch, uint8_t i) const = 0;
     virtual uint8_t glyphWidth(char ch) const = 0;
 };
 
 class VariableWidthFont : public Font {
 public:
-    explicit VariableWidthFont(char firstChar, char lastChar, uint8_t height, const uint8_t* pgmPtr);
+    explicit VariableWidthFont(char firstChar, char lastChar, uint8_t height,
+        const uint8_t* bitmapPgmPtr, const uint8_t* dataPgmPtr);
     virtual ~VariableWidthFont();
-    virtual uint8_t glyphHeight() const;
+    virtual uint8_t byteHeight() const;
+    virtual uint8_t fontHeight() const;
     virtual uint8_t glyphData(char ch, uint8_t i) const;
     virtual uint8_t glyphWidth(char ch) const;
 private:
-    uint16_t* _charOffset;
+    uint8_t readPtrByte(const uint8_t* ptr, uint16_t offset) const;
+    const uint8_t* _bitmapPgmPtr;
+    const uint8_t* _dataPgmPtr;
     char _firstChar;
     uint8_t _height;
     char _lastChar;
-    const uint8_t* _pgmPtr;
 };
 
-class VariableFont : public Font {
+class BuiltinFont : public Font {
 public:
-    explicit VariableFont(char firstChar, char lastChar, const uint8_t* pgmPtr);
-    virtual ~VariableFont();
-    virtual uint8_t glyphHeight() const;
+    explicit BuiltinFont (char firstChar, char lastChar, const uint8_t* pgmPtr);
+    virtual ~BuiltinFont ();
+    virtual uint8_t byteHeight() const;
+    virtual uint8_t fontHeight() const;
     virtual uint8_t glyphData(char ch, uint8_t i) const;
     virtual uint8_t glyphWidth(char ch) const;
 private:
@@ -69,7 +74,7 @@ private:
     const uint8_t* _pgmPtr;
 };
 
-extern VariableWidthFont DEFAULT_FONT;
+extern BuiltinFont DEFAULT_FONT;
 
 #endif
 

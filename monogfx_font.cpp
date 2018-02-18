@@ -139,40 +139,42 @@ PROGMEM const uint8_t DEFAULT_FONT_PGM[] PROGMEM = {
     4, B00000010, B00000001, B00000010, B00000001, // ~
 };
 
-VariableWidthFont DEFAULT_FONT = VariableWidthFont(' ', '~', 8, DEFAULT_FONT_PGM);
+BuiltinFont  DEFAULT_FONT = BuiltinFont (' ', '~', DEFAULT_FONT_PGM);
 
 Font::~Font() {
 }
 
-VariableWidthFont::VariableWidthFont(char firstChar, char lastChar, uint8_t height, const uint8_t* pgmPtr) :
+VariableWidthFont::VariableWidthFont(char firstChar, char lastChar, uint8_t height,
+    const uint8_t* bitmapPgmPtr, const uint8_t* dataPgmPtr) :
+    _bitmapPgmPtr(bitmapPgmPtr),
+    _dataPgmPtr(dataPgmPtr),
     _firstChar(firstChar),
     _height(height),
-    _lastChar(lastChar),
-    _pgmPtr(pgmPtr)
-{
-    uint8_t charCount = _lastChar - _firstChar + 1;
-    _charOffset = new uint16_t[charCount];
-    uint16_t offset = 0;
-    for (uint8_t i = 0; i < charCount; ++i) {
-        _charOffset[i] = offset;
-        offset += pgm_read_byte_far(_pgmPtr + offset) + 1;
-    }
+    _lastChar(lastChar) {
 }
 
 VariableWidthFont::~VariableWidthFont() {
-    delete[] _charOffset;
+}
+
+uint8_t VariableWidthFont::byteHeight() const {
+    return 1 + (_height - 1) / 8;
 }
 
 uint8_t VariableWidthFont::glyphData(char ch, uint8_t i) const {
     if (ch < _firstChar || _lastChar < ch) {
         return 0;
     }
-    
-    return pgm_read_byte_far(_pgmPtr + _charOffset[ch - _firstChar] + 1 + i);
+
+    uint16_t charOffset = 3 * (ch - _firstChar);
+    uint16_t bitmapOffset = readPtrByte(_dataPgmPtr, charOffset);
+    bitmapOffset <<= 8;
+    bitmapOffset += readPtrByte(_dataPgmPtr, charOffset + 1);
+    uint8_t result = readPtrByte(_bitmapPgmPtr, bitmapOffset + i);
+    return result;
 }
 
-uint8_t VariableWidthFont::glyphHeight() const {
-    return 8;
+uint8_t VariableWidthFont::fontHeight() const {
+    return _height;
 }
 
 uint8_t VariableWidthFont::glyphWidth(char ch) const {
@@ -180,10 +182,15 @@ uint8_t VariableWidthFont::glyphWidth(char ch) const {
         return 0;
     }
 
-    return pgm_read_byte_far(_pgmPtr + _charOffset[ch - _firstChar]);
+    return readPtrByte(_dataPgmPtr, 3 * (ch - _firstChar) + 2);
 }
 
-VariableFont::VariableFont(char firstChar, char lastChar, const uint8_t* pgmPtr) :
+uint8_t VariableWidthFont::readPtrByte(const uint8_t* ptr, uint16_t offset) const {
+    return pgm_read_byte_far(ptr + offset);
+}
+
+
+BuiltinFont ::BuiltinFont (char firstChar, char lastChar, const uint8_t* pgmPtr) :
     _firstChar(firstChar),
     _lastChar(lastChar),
     _pgmPtr(pgmPtr)
@@ -197,10 +204,14 @@ VariableFont::VariableFont(char firstChar, char lastChar, const uint8_t* pgmPtr)
     }
 }
 
-VariableFont::~VariableFont() {
+BuiltinFont ::~BuiltinFont () {
 }
 
-uint8_t VariableFont::glyphData(char ch, uint8_t i) const {
+uint8_t BuiltinFont::byteHeight() const {
+    return 1;
+}
+
+uint8_t BuiltinFont ::glyphData(char ch, uint8_t i) const {
     if (ch < _firstChar || _lastChar < ch) {
         return 0;
     }
@@ -208,11 +219,11 @@ uint8_t VariableFont::glyphData(char ch, uint8_t i) const {
     return pgm_read_byte_far(_pgmPtr + _charOffset[ch - _firstChar] + 1 + i);
 }
 
-uint8_t VariableFont::glyphHeight() const {
+uint8_t BuiltinFont::fontHeight() const {
     return 8;
 }
 
-uint8_t VariableFont::glyphWidth(char ch) const {
+uint8_t BuiltinFont ::glyphWidth(char ch) const {
     if (ch < _firstChar || _lastChar < ch) {
         return 0;
     }

@@ -1,19 +1,19 @@
 /*
  * BSD 2-Clause License
  *
- * Copyright (c) 2017 - 2018, Stefan Rothe
+ * Copyright (c) 2018, Stefan Rothe
  * All rights reserved.
- * 
+ *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
- * 
+ *
  * * Redistributions of source code must retain the above copyright notice, this
  *   list of conditions and the following disclaimer.
- * 
+ *
  * * Redistributions in binary form must reproduce the above copyright notice,
  *   this list of conditions and the following disclaimer in the documentation
  *   and/or other materials provided with the distribution.
- * 
+ *
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
  * AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
  * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
@@ -25,26 +25,16 @@
  * OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
- 
-#ifndef SSD1306_H
-#define SSD1306_H
 
-#include "monogfx.h"
+#include "fonts/genera_big.h"
+#include "fonts/genera_big_b.h"
 
-class SSD1306 : public MonoGfx {
-public:
-    SSD1306(uint8_t i2cAddress);
-    void setContrast(uint8_t contrast);
-    void setDisplayOffset(uint8_t offset);
-    void setInvert(bool enable);
-    void setSleepMode(bool sleep);
-    void setTestMode(bool enable);
-protected:
-    virtual bool doInitialize();
-    virtual void doUpdate(uint8_t* buffer, uint16_t left, uint16_t top, uint16_t right, uint16_t bottom);
-private:
-    void sendCommand(uint8_t command) const;
-    uint8_t _i2cAddress;
-};
-#endif
+#include "fonts/helvetica_18.h"
+#include "fonts/helvetica_18_b.h"
+
+#include "fonts/hl_18.h"
+#include "fonts/hl_18_b.h"
+
+#include "fonts/swiss_20.h"
+#include "fonts/swiss_20_b.h"
 

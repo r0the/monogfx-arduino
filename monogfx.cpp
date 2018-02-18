@@ -93,26 +93,30 @@ void MonoGfx::drawBitmapPgm(int16_t x, int16_t y, const uint8_t* pgmBitmap, uint
 
 
 int16_t MonoGfx::drawCharacter(int16_t x, int16_t y, char ch) {
-    uint8_t charWidth = _font->glyphWidth(ch);
-    uint8_t data;
-    for (uint8_t i = 0; i < charWidth; ++i) {
-        data = _font->glyphData(ch, i);
-        for (uint8_t yi = 0; yi < 8; ++yi) {
-            if (data & 1) {
-                for (uint8_t sx = 0; sx < _fontScale; ++sx) {
-                    for (uint8_t sy = 0; sy < _fontScale; ++sy) {
-                        drawPixel(x + sx, y + (yi - 7) * _fontScale + sy);
-                    }
-                }
+    uint8_t glyphWidth = _font->glyphWidth(ch);
+    uint8_t fontHeight = _font->fontHeight();
+    uint8_t bufferPos = 0;
+    for (uint8_t cx = 0; cx < glyphWidth; ++cx) {
+        uint8_t data = _font->glyphData(ch, bufferPos);
+        ++bufferPos;
+        uint8_t bit = 1;
+        for (uint8_t cy = 0; cy < fontHeight; ++cy) {
+            if (data & bit) {
+                drawPixel(x + cx, y + cy);
             }
 
-            data >>= 1;
+            if (bit == 128) {
+                data = _font->glyphData(ch, bufferPos);
+                ++bufferPos;
+                bit = 1;
+            }
+            else {
+                bit <<= 1;
+            }
         }
-   
-        x += _fontScale;
     }
 
-    return x + _fontScale;
+    return x + glyphWidth + _font->byteHeight();
 }
 
 void MonoGfx::drawCircle(int16_t centerX, int16_t centerY, uint16_t radius) {

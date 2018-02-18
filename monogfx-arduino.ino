@@ -1,65 +1,34 @@
-//#include "ssd1331.h"
-#include "ssd1306.h"
-#include "monogfx.h"
 #include <Wire.h>
-//#include "fonts/artos_sans_8.h"
-//#include "fonts/victoria.h"
-//#include "fonts/victoria_bold.h"
-
-
-
-//DOGM132 lcd(10, 11, 12, 8, 9);
-
-// 
-//SSD1331 lcd(6, 13, 14);
-
-// Feather 
-//SSD1331 lcd(5, 1, 0);
-//DOGM132 lcd(10, 11, 12);
+#include "ssd1306.h"
+#include "all_fonts.h"
 
 SSD1306 gfx(0x3C);
 
 void setup() {
     Wire.begin();
-    Serial.begin(9600);
-    while (!Serial) {
-        delay(10);
-    }
-
-    Serial.println("Initializing display...");
-
     gfx.begin();
-    Serial.println("Initialized display...");
-    if (!gfx.ready()) {
-        Serial.println("Display not found");
-    }
-    else {
-        Serial.println("Display ready");
-    }
+}
 
-    gfx.turnOff();
-    delay(1000);
-        Serial.println("turn on...");
-    gfx.turnOn();
-    gfx.test(true);
-        Serial.println("test ...");
-    delay(1000);
-    gfx.test(false);
-    gfx.setInvert(true);
-
-    Serial.println("test donw");
+void fontSample(Font* font, const char* desc) {
+    gfx.clear();
+    gfx.setFont(font);
+    gfx.drawText(0, 10, desc);
+    gfx.update();
+    delay(2000);
 }
 
 void loop() {
-    gfx.clear();
-//    gfx.setFont(&FONT_VICTORIA);
-    gfx.drawText(0, 10, "Victoria");
-//    gfx.setFont(&FONT_VICTORIA_BOLD);
-    gfx.drawText(0, 20, "Victoria Bold");
-//    gfx.setFont(&FONT_ARTOS_SANS_8);
-    gfx.drawText(0, 30, "Artos Sans");
-    gfx.update();
-    delay(2000);
+    fontSample(&GENERA_BIG, "Genera Big Regular");
+    fontSample(&GENERA_BIG_B, "Genera Big Bold");
+    fontSample(&HELVETICA_18, "Helvetica 18 Regular");
+    fontSample(&HELVETICA_18_B, "Helvetica 18 Bold");
+    fontSample(&HL_18, "HL 18 Regular");
+    fontSample(&HL_18_B, "HL 18 Bold");
+    fontSample(&SWISS_20, "Swiss 20 Regular");
+    fontSample(&SWISS_20_B, "Swiss 20 Bold");
+
+
+    return;
 
     gfx.clear();
     for (uint8_t r = 0; r < gfx.height(); r += 4) {

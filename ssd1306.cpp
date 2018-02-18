@@ -33,27 +33,29 @@
 #define DISPLAY_WIDTH 128
 #define DISPLAY_HEIGHT 32
 
-#define CMD_MEMORY_MODE           0x20
-#define CMD_SET_COLUMN_ADDRESS    0x21
-#define CMD_SET_PAGE_ADDRESS      0x22
-#define CMD_DEACTIVATE_SCROLL     0x2E
-#define CMD_SET_CONTRAST          0x81
-#define CMD_CHARGE_PUMP           0x8D
-#define CMD_SET_START_LINE        0x40
-#define CMD_SEGRE_MAP             0xA0
-#define CMD_TEST_OFF              0xA4
-#define CMD_TEST_ON               0xA5
-#define CMD_INVERT_OFF            0xA6
-#define CMD_INVERT_ON             0xA7
-#define CMD_SET_MULTIPLEX         0xA8
-#define CMD_SET_DISPLAY_SLEEP     0xAE
-#define CMD_SET_DISPLAY_ON        0xAF
-#define CMD_SET_DISPLAY_OFFSET    0xD3
-#define CMD_SET_DISPLAY_CLOCK_DIV 0xD5
-#define CMD_SET_PRECHARGE         0xD9
-#define CMD_SET_COM_PINS          0xDA
-#define CMD_SET_VCOM_DETECT       0xDB
-#define CMD_COM_SCAN_DEC          0xC8
+#define CMD_SET_MEMORY_ADDRRESSING_MODE  0x20
+#define CMD_SET_COLUMN_ADDRESS       0x21
+#define CMD_SET_PAGE_ADDRESS         0x22
+#define CMD_DEACTIVATE_SCROLL        0x2E
+#define CMD_SET_CONTRAST             0x81
+#define CMD_CHARGE_PUMP              0x8D
+#define CMD_SET_START_LINE           0x40
+#define CMD_SEGRE_MAP                0xA0
+#define CMD_TEST_OFF                 0xA4
+#define CMD_TEST_ON                  0xA5
+#define CMD_INVERT_OFF               0xA6
+#define CMD_INVERT_ON                0xA7
+#define CMD_SET_MULTIPLEX            0xA8
+#define CMD_SET_DISPLAY_SLEEP        0xAE
+#define CMD_SET_DISPLAY_ON           0xAF
+#define CMD_SET_DISPLAY_OFFSET       0xD3
+#define CMD_SET_DISPLAY_CLOCK_DIV    0xD5
+#define CMD_SET_PRECHARGE            0xD9
+#define CMD_SET_COM_PINS             0xDA
+#define CMD_SET_VCOM_DETECT          0xDB
+#define CMD_COM_SCAN_DEC             0xC8
+
+#define HORIZONTAL_ADDRESSING_MODE   0x00
 
 SSD1306::SSD1306(uint8_t i2cAddress) :
     MonoGfx(DISPLAY_WIDTH, DISPLAY_HEIGHT),
@@ -74,16 +76,12 @@ void SSD1306::setInvert(bool enable) {
     sendCommand(enable ? CMD_INVERT_ON : CMD_INVERT_OFF);
 }
 
-void SSD1306::test(boolean enable) {
+void SSD1306::setSleepMode(bool enable) {
+    sendCommand(enable ? CMD_SET_DISPLAY_SLEEP : CMD_SET_DISPLAY_ON);
+}
+
+void SSD1306::setTestMode(boolean enable) {
     sendCommand(enable ? CMD_TEST_ON : CMD_TEST_OFF);
-}
-
-void SSD1306::turnOn() {
-    sendCommand(CMD_SET_DISPLAY_ON);
-}
-
-void SSD1306::turnOff() {
-    sendCommand(CMD_SET_DISPLAY_SLEEP);    
 }
 
 bool SSD1306::doInitialize() {
@@ -93,13 +91,13 @@ bool SSD1306::doInitialize() {
     Serial.println(Wire.endTransmission());
 
     Serial.println("1306: init 2");
-    sendCommand(CMD_SET_DISPLAY_SLEEP);
+    setSleepMode(true);
 
     sendCommand(CMD_SET_DISPLAY_CLOCK_DIV);
     sendCommand(0x80);
 
     sendCommand(CMD_SET_MULTIPLEX);
-    sendCommand(DISPLAY_HEIGHT - 1);
+    sendCommand(height() - 1);
 
     sendCommand(CMD_SET_DISPLAY_OFFSET);
     sendCommand(0x0);
@@ -110,8 +108,8 @@ bool SSD1306::doInitialize() {
     bool _externalVcc = false;
     sendCommand(_externalVcc ? 0x10 : 0x14);
 
-    sendCommand(CMD_MEMORY_MODE);
-    sendCommand(0x00);
+    sendCommand(CMD_SET_MEMORY_ADDRRESSING_MODE);
+    sendCommand(HORIZONTAL_ADDRESSING_MODE);
 
     sendCommand(CMD_SEGRE_MAP | 0x1);
 
@@ -119,7 +117,7 @@ bool SSD1306::doInitialize() {
 
     sendCommand(CMD_SET_COM_PINS);
     sendCommand(0x02);
-    
+
     sendCommand(CMD_SET_CONTRAST);
     sendCommand(0x8F);
 
@@ -129,29 +127,29 @@ bool SSD1306::doInitialize() {
     sendCommand(CMD_SET_VCOM_DETECT);
     sendCommand(0x40);
   
-    sendCommand(CMD_TEST_OFF);
-    
-    sendCommand(CMD_INVERT_OFF);
-
+    setTestMode(false);
+    setInvert(false);
     sendCommand(CMD_DEACTIVATE_SCROLL);
 
-    sendCommand(CMD_SET_DISPLAY_ON);
+    setSleepMode(false);
     return true;
 }
 
 void SSD1306::doUpdate(uint8_t* buffer, uint16_t left, uint16_t top, uint16_t right, uint16_t bottom) {
     sendCommand(CMD_SET_COLUMN_ADDRESS);
     sendCommand(0);
-    sendCommand(DISPLAY_WIDTH - 1);
+    sendCommand(width() - 1);
     sendCommand(CMD_SET_PAGE_ADDRESS);
     sendCommand(0);
+    sendCommand(height() / 8 - 1);
 
-    uint16_t bytes = (DISPLAY_WIDTH * DISPLAY_HEIGHT / 8);
+    uint16_t bytes = (width() * height() / 8);
     uint16_t pos = 0;
     while (pos < bytes) {
+        // data must be sent in chunks of max. 32 bytes
         Wire.beginTransmission(_i2cAddress);
         Wire.write(0x40);
-        for (uint16_t i = 0; i < 8; ++i) {
+        for (uint8_t i = 0; i < 32; ++i) {
             Wire.write(buffer[pos]);
             ++pos;
         }

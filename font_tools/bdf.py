@@ -147,7 +147,7 @@ class Glyph:
 
 
     def range_x(self):
-        return range(self._font.bounding_box().left(), self._bounding_box.right())
+        return range(self._bounding_box.left(), self._bounding_box.right())
 
 
     def range_y(self):
