@@ -85,12 +85,11 @@ void SSD1306::setTestMode(bool enable) {
 }
 
 bool SSD1306::doInitialize() {
-    Serial.println("1306: init 1");
-    Serial.println(_i2cAddress);
     Wire.beginTransmission(_i2cAddress);
-    Serial.println(Wire.endTransmission());
+    if (Wire.endTransmission() != 0) {
+        return false;
+    }
 
-    Serial.println("1306: init 2");
     setSleepMode(true);
 
     sendCommand(CMD_SET_DISPLAY_CLOCK_DIV);

@@ -5,12 +5,12 @@
 
 SSD1306 gfx(0x3C);
 
-SSD1331 gfx2(1, 2, 3);
-
+//SSD1331 gfx2(1, 2, 3);
 
 void setup() {
     Wire.begin();
     gfx.begin();
+
 }
 
 void fontSample(Font* font, const char* desc) {
@@ -22,6 +22,7 @@ void fontSample(Font* font, const char* desc) {
 }
 
 void loop() {
+/*    
     fontSample(&GENERA_BIG, "Genera Big Regular");
     fontSample(&GENERA_BIG_B, "Genera Big Bold");
     fontSample(&HELVETICA_18, "Helvetica 18 Regular");
@@ -30,9 +31,10 @@ void loop() {
     fontSample(&HL_18_B, "HL 18 Bold");
     fontSample(&SWISS_20, "Swiss 20 Regular");
     fontSample(&SWISS_20_B, "Swiss 20 Bold");
-
-
-    return;
+*/
+    gfx.drawText(10, 10, "Hello World");
+    gfx.update();
+    delay(2000);
 
     gfx.clear();
     for (uint8_t r = 0; r < gfx.height(); r += 4) {

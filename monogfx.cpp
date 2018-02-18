@@ -27,10 +27,11 @@
  */
 
 #include "monogfx.h"
+#include "fonts/helvetica_8.h"
 
 MonoGfx::MonoGfx(uint16_t width, uint16_t height) :
     _buffer(new uint8_t[width * height / 8]),
-    _font(&DEFAULT_FONT),
+    _font(&HELVETICA_8),
     _fontScale(1),
     _height(height),
     _mode(MODE_SET),
