@@ -1,8 +1,12 @@
 #include <Wire.h>
 #include "ssd1306.h"
+#include "ssd1331.h"
 #include "all_fonts.h"
 
 SSD1306 gfx(0x3C);
+
+SSD1331 gfx2(1, 2, 3);
+
 
 void setup() {
     Wire.begin();

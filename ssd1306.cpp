@@ -80,7 +80,7 @@ void SSD1306::setSleepMode(bool enable) {
     sendCommand(enable ? CMD_SET_DISPLAY_SLEEP : CMD_SET_DISPLAY_ON);
 }
 
-void SSD1306::setTestMode(boolean enable) {
+void SSD1306::setTestMode(bool enable) {
     sendCommand(enable ? CMD_TEST_ON : CMD_TEST_OFF);
 }
 

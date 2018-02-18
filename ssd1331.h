@@ -34,15 +34,12 @@
 class SSD1331 : public MonoGfx {
 public:
     SSD1331(uint8_t csPin, uint8_t resetPin, uint8_t dcPin);
-    void begin();
-    virtual void turnOn();
-    virtual void turnOff();
-    virtual void update(uint8_t* buffer, uint16_t left, uint16_t top, uint16_t right, uint16_t bottom);
-    virtual uint16_t height() const;
-    virtual uint16_t width() const;
-
-    virtual void setBackgroundColor(uint8_t red, uint8_t green, uint8_t blue);
-    virtual void setForegroundColor(uint8_t red, uint8_t green, uint8_t blue);
+    void setBackgroundColor(uint8_t red, uint8_t green, uint8_t blue);
+    void setForegroundColor(uint8_t red, uint8_t green, uint8_t blue);
+    void setSleepMode(bool sleep);
+protected:
+    virtual bool doInitialize();
+    virtual void doUpdate(uint8_t* buffer, uint16_t left, uint16_t top, uint16_t right, uint16_t bottom);
 private:
     void endTransfer() const;
     void startTransfer(bool command) const;

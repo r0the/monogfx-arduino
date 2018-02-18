@@ -91,7 +91,7 @@ SSD1331::SSD1331(uint8_t csPin, uint8_t resetPin, uint8_t dcPin) :
     setBackgroundColor(0, 0, 0);
 }
 
-void SSD1331::begin() {
+bool SSD1331::doInitialize() {
     SPI.begin();
     SPI.setBitOrder(MSBFIRST);
     SPI.setDataMode(SPI_MODE3);
@@ -179,29 +179,6 @@ void SSD1331::begin() {
     endTransfer();
 }
 
-uint16_t SSD1331::height() const {
-    return DISPLAY_HEIGHT;
-}
-
-void SSD1331::turnOn() {
-    digitalWrite(_dcPin, LOW);
-    digitalWrite(_csPin, LOW);
-    SPI.transfer(CMD_SET_DISPLAY_ON);
-    digitalWrite(_csPin, HIGH);
-}
-
-void SSD1331::turnOff() {
-    digitalWrite(_dcPin, LOW);
-    digitalWrite(_csPin, LOW);
-    SPI.transfer(CMD_SET_DISPLAY_SLEEP);
-    digitalWrite(_csPin, HIGH);
-}
-
-uint16_t SSD1331::width() const {
-    return DISPLAY_WIDTH;
-}
-
-
 void SSD1331::setBackgroundColor(uint8_t red, uint8_t green, uint8_t blue) {
     _backgroundColor = color8bit(red, green, blue);
 }
@@ -210,7 +187,14 @@ void SSD1331::setForegroundColor(uint8_t red, uint8_t green, uint8_t blue) {
     _foregroundColor = color8bit(red, green, blue);
 }
 
-void SSD1331::update(uint8_t* buffer, uint16_t left, uint16_t top, uint16_t right, uint16_t bottom) {
+void SSD1331::setSleepMode(bool enable) {
+    digitalWrite(_dcPin, LOW);
+    digitalWrite(_csPin, LOW);
+    SPI.transfer(enable ? CMD_SET_DISPLAY_SLEEP : CMD_SET_DISPLAY_ON);
+    digitalWrite(_csPin, HIGH);
+}
+
+void SSD1331::doUpdate(uint8_t* buffer, uint16_t left, uint16_t top, uint16_t right, uint16_t bottom) {
     startTransfer(true);
     SPI.transfer(CMD_SET_COLUMN_ADDRESS);
     SPI.transfer(left);
