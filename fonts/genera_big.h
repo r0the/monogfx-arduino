@@ -1,3 +1,6 @@
+#ifndef GENERA_BIG_H
+#define GENERA_BIG_H
+
 #include "../monogfx_font.h"
 
 PROGMEM const uint8_t GENERA_BIG_BITMAP_PGM[] PROGMEM = {
@@ -195,3 +198,4 @@ PROGMEM const uint8_t GENERA_BIG_DATA_PGM[] PROGMEM = {
 
 VariableWidthFont GENERA_BIG = VariableWidthFont('!', '~', 20, GENERA_BIG_BITMAP_PGM, GENERA_BIG_DATA_PGM);
 
+#endif

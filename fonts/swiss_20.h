@@ -1,3 +1,6 @@
+#ifndef SWISS_20_H
+#define SWISS_20_H
+
 #include "../monogfx_font.h"
 
 PROGMEM const uint8_t SWISS_20_BITMAP_PGM[] PROGMEM = {
@@ -195,3 +198,4 @@ PROGMEM const uint8_t SWISS_20_DATA_PGM[] PROGMEM = {
 
 VariableWidthFont SWISS_20 = VariableWidthFont('!', '~', 20, SWISS_20_BITMAP_PGM, SWISS_20_DATA_PGM);
 
+#endif

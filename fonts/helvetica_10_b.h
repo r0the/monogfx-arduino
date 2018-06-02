@@ -1,3 +1,6 @@
+#ifndef HELVETICA_10_B_H
+#define HELVETICA_10_B_H
+
 #include "../monogfx_font.h"
 
 PROGMEM const uint8_t HELVETICA_10_B_BITMAP_PGM[] PROGMEM = {
@@ -195,3 +198,4 @@ PROGMEM const uint8_t HELVETICA_10_B_DATA_PGM[] PROGMEM = {
 
 VariableWidthFont HELVETICA_10_B = VariableWidthFont('!', '~', 12, HELVETICA_10_B_BITMAP_PGM, HELVETICA_10_B_DATA_PGM);
 
+#endif

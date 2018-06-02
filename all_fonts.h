@@ -26,9 +26,17 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+#ifndef ALL_FONTS_H
+#define ALL_FONTS_H
+
 #include "fonts/genera_big.h"
 #include "fonts/genera_big_b.h"
 
+#include "fonts/helvetica_8.h"
+#include "fonts/helvetica_10.h"
+#include "fonts/helvetica_10_b.h"
+#include "fonts/helvetica_12.h"
+#include "fonts/helvetica_14.h"
 #include "fonts/helvetica_18.h"
 #include "fonts/helvetica_18_b.h"
 
@@ -37,4 +45,6 @@
 
 #include "fonts/swiss_20.h"
 #include "fonts/swiss_20_b.h"
+
+#endif
 

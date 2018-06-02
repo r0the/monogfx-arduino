@@ -27,7 +27,7 @@
  */
 
 #include "monogfx.h"
-#include "fonts/helvetica_8.h"
+#include "all_fonts.h"
 
 MonoGfx::MonoGfx(uint16_t width, uint16_t height) :
     _buffer(new uint8_t[width * height / 8]),
@@ -50,7 +50,9 @@ void MonoGfx::begin() {
 }
 
 void MonoGfx::clear() {
-    memset(_buffer, 0, _width * _height / 8);
+    for (uint16_t i = 0; i < _width * _height / 8; ++i) {
+        _buffer[i] = 0;
+    }
 }
 
 void MonoGfx::debugBegin() {
@@ -257,7 +259,8 @@ void MonoGfx::fillRectangle(int16_t left, int16_t top, uint16_t width, uint16_t 
     const int16_t right = left + width - 1;
     const int16_t bottom = top + height - 1;
     while (top <= bottom) {
-        drawHorizontalLine(left, right, top);
+        drawHorizontalLine(left, top, right);
+        ++top;
     }
 }
 

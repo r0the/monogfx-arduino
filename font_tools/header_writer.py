@@ -10,7 +10,11 @@ class Writer:
 
 
     def write(self, font):
-        self._file.write('#include "../monogfx_font.h"\n')
+        self._file.write("#ifndef ")
+        self._file.write(self._variable_name)
+        self._file.write("_H\n#define ")
+        self._file.write(self._variable_name)
+        self._file.write('_H\n\n#include "../monogfx_font.h"\n')
         self._file.write('\n')
         self.write_font_bitmap(font)
         self._file.write('\n')
@@ -28,7 +32,7 @@ class Writer:
         self._file.write(self._variable_name)
         self._file.write('_BITMAP_PGM, ');
         self._file.write(self._variable_name)
-        self._file.write('_DATA_PGM);\n');
+        self._file.write('_DATA_PGM);\n\n#endif');
         self._file.write('\n')
         self._file.close()
         return

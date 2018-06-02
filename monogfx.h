@@ -40,6 +40,16 @@
 #define MODE_CLEAR 1
 #define MODE_INVERT 2
 
+extern VariableWidthFont HELVETICA_8;
+extern VariableWidthFont HELVETICA_10;
+extern VariableWidthFont HELVETICA_10_B;
+extern VariableWidthFont HELVETICA_12;
+extern VariableWidthFont HELVETICA_14;
+extern VariableWidthFont HELVETICA_18;
+extern VariableWidthFont HELVETICA_18_B;
+extern VariableWidthFont SWISS_20;
+extern VariableWidthFont SWISS_20_B;
+
 class MonoGfx {
 public:
     explicit MonoGfx(uint16_t width, uint16_t height);

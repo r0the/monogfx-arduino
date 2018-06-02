@@ -1,7 +1,7 @@
 #include <Wire.h>
 #include "ssd1306.h"
 #include "ssd1331.h"
-#include "all_fonts.h"
+
 
 SSD1306 gfx(0x3C);
 

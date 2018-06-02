@@ -1,3 +1,6 @@
+#ifndef HL_18_B_H
+#define HL_18_B_H
+
 #include "../monogfx_font.h"
 
 PROGMEM const uint8_t HL_18_B_BITMAP_PGM[] PROGMEM = {
@@ -195,3 +198,4 @@ PROGMEM const uint8_t HL_18_B_DATA_PGM[] PROGMEM = {
 
 VariableWidthFont HL_18_B = VariableWidthFont('!', '~', 23, HL_18_B_BITMAP_PGM, HL_18_B_DATA_PGM);
 
+#endif
