@@ -69,6 +69,7 @@ public:
     void drawVerticalLine(int16_t x, int16_t y1, int16_t y2);
     void fill();
     void fillRectangle(int16_t left, int16_t top, uint16_t width, uint16_t height);
+    Font* font() const { return _font; }
     inline uint8_t fontScale() const { return _fontScale; }
     inline uint16_t height() const { return _height; }
     inline uint8_t mode() const { return _mode; }
