@@ -52,7 +52,7 @@ extern VariableWidthFont SWISS_20_B;
 
 class MonoGfx {
 public:
-    explicit MonoGfx(uint16_t width, uint16_t height);
+    explicit MonoGfx(uint16_t width, uint16_t height, uint8_t pages);
     ~MonoGfx();
     void begin();
     void clear();
@@ -80,17 +80,20 @@ public:
     inline uint8_t textAlign() const { return _textAlign; }
     uint16_t textWidth(const char* text) const;
     void update();
+    void updatePage();
     inline uint16_t width() const { return _width; }
 protected:
     // hardware-specific implementation
     virtual bool doInitialize() = 0;
-    virtual void doUpdate(uint8_t* buffer, uint16_t left, uint16_t top, uint16_t right, uint16_t bottom) = 0;
+    virtual void doUpdate(uint8_t* buffer, uint8_t partition) = 0;
 private:
     uint8_t* _buffer;
     Font* _font;
     uint8_t _fontScale;
     uint16_t _height;
     uint8_t _mode;
+    uint8_t _nextPage;
+    uint8_t _pages;
     bool _ready;
     uint8_t _textAlign;
     uint16_t _width;

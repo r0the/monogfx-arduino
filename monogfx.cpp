@@ -29,12 +29,14 @@
 #include "monogfx.h"
 #include "all_fonts.h"
 
-MonoGfx::MonoGfx(uint16_t width, uint16_t height) :
+MonoGfx::MonoGfx(uint16_t width, uint16_t height, uint8_t pages) :
     _buffer(new uint8_t[width * height / 8]),
     _font(&HELVETICA_8),
     _fontScale(1),
     _height(height),
     _mode(MODE_SET),
+    _nextPage(0),
+    _pages(pages),
     _ready(false),
     _width(width)
 {
@@ -304,6 +306,13 @@ uint16_t MonoGfx::textWidth(const char* text) const {
 }
 
 void MonoGfx::update() {
-    doUpdate(_buffer, 0, 0, _width-1, _height-1);
+    for (uint8_t page = 0; page < _pages; ++page) {
+        doUpdate(_buffer, page);
+    }
+}
+
+void MonoGfx::updatePage() {
+    doUpdate(_buffer, _nextPage);
+    _nextPage = (_nextPage + 1) % _pages;
 }
 

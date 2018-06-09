@@ -32,6 +32,7 @@
 #define CONTROL 0x00
 #define DISPLAY_WIDTH 128
 #define DISPLAY_HEIGHT 32
+#define DISPLAY_PAGES 4
 
 #define CMD_SET_MEMORY_ADDRRESSING_MODE  0x20
 #define CMD_SET_COLUMN_ADDRESS       0x21
@@ -58,7 +59,7 @@
 #define HORIZONTAL_ADDRESSING_MODE   0x00
 
 SSD1306::SSD1306(uint8_t i2cAddress) :
-    MonoGfx(DISPLAY_WIDTH, DISPLAY_HEIGHT),
+    MonoGfx(DISPLAY_WIDTH, DISPLAY_HEIGHT, DISPLAY_PAGES),
     _i2cAddress(i2cAddress) {
 }
 
@@ -134,17 +135,18 @@ bool SSD1306::doInitialize() {
     return true;
 }
 
-void SSD1306::doUpdate(uint8_t* buffer, uint16_t left, uint16_t top, uint16_t right, uint16_t bottom) {
+void SSD1306::doUpdate(uint8_t* buffer, uint8_t page) {
     sendCommand(CMD_SET_COLUMN_ADDRESS);
     sendCommand(0);
     sendCommand(width() - 1);
     sendCommand(CMD_SET_PAGE_ADDRESS);
-    sendCommand(0);
-    sendCommand(height() / 8 - 1);
+    sendCommand(page);
+    sendCommand(page);
 
-    uint16_t bytes = (width() * height() / 8);
-    uint16_t pos = 0;
-    while (pos < bytes) {
+    uint16_t startPos = DISPLAY_WIDTH * page;
+    uint16_t endPos = startPos + DISPLAY_WIDTH;
+    uint16_t pos = startPos;
+    while (pos < endPos) {
         // data must be sent in chunks of max. 32 bytes
         Wire.beginTransmission(_i2cAddress);
         Wire.write(0x40);

@@ -39,7 +39,7 @@ public:
     void setSleepMode(bool sleep);
 protected:
     virtual bool doInitialize();
-    virtual void doUpdate(uint8_t* buffer, uint16_t left, uint16_t top, uint16_t right, uint16_t bottom);
+    virtual void doUpdate(uint8_t* buffer, uint8_t page);
 private:
     void endTransfer() const;
     void startTransfer(bool command) const;

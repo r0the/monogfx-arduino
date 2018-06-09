@@ -31,6 +31,7 @@
 
 #define DISPLAY_WIDTH 96
 #define DISPLAY_HEIGHT 64
+#define DISPLAY_PAGES 1
 
 #define CMD_SET_COLUMN_ADDRESS        0x15
 #define CMD_SET_ROW_ADDRESS           0x75
@@ -83,7 +84,7 @@ static uint16_t color8bit(uint8_t red, uint8_t green, uint8_t blue) {
 }
 
 SSD1331::SSD1331(uint8_t csPin, uint8_t resetPin, uint8_t dcPin) :
-    MonoGfx(DISPLAY_WIDTH, DISPLAY_HEIGHT),
+    MonoGfx(DISPLAY_WIDTH, DISPLAY_HEIGHT, DISPLAY_PAGES),
     _csPin(csPin),
     _dcPin(dcPin),
     _resetPin(resetPin) {
@@ -194,19 +195,19 @@ void SSD1331::setSleepMode(bool enable) {
     digitalWrite(_csPin, HIGH);
 }
 
-void SSD1331::doUpdate(uint8_t* buffer, uint16_t left, uint16_t top, uint16_t right, uint16_t bottom) {
+void SSD1331::doUpdate(uint8_t* buffer, uint8_t page) {
     startTransfer(true);
     SPI.transfer(CMD_SET_COLUMN_ADDRESS);
-    SPI.transfer(left);
-    SPI.transfer(right);
+    SPI.transfer(0);
+    SPI.transfer(width() - 1);
     SPI.transfer(CMD_SET_ROW_ADDRESS);
-    SPI.transfer(top);
-    SPI.transfer(bottom);
+    SPI.transfer(0);
+    SPI.transfer(height() - 1);
     startTransfer(false);
-    for (uint8_t y = top; y < bottom + 1; ++y) {
+    for (uint8_t y = 0; y < height(); ++y) {
         uint8_t bit = 1 << (y % 8);
         uint16_t pos = DISPLAY_WIDTH * (y / 8);
-        for (uint8_t x = left; x < right + 1; ++x) {
+        for (uint8_t x = 0; x < width(); ++x) {
             if (buffer[pos + x] & bit) {
                 SPI.transfer(_foregroundColor);
             }
