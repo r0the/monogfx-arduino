@@ -178,6 +178,7 @@ bool SSD1331::doInitialize() {
 
     SPI.transfer(CMD_SET_DISPLAY_ON);
     endTransfer();
+    return true;
 }
 
 void SSD1331::setBackgroundColor(uint8_t red, uint8_t green, uint8_t blue) {
@@ -234,4 +235,3 @@ void SSD1331::startTransfer(bool command) const {
 
     digitalWrite(_csPin, LOW);
 }
-
